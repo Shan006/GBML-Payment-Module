@@ -1,0 +1,39 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_20-7318c657e36e5e632b005d9a63371fc0baec3ebe",
+  "solcVersion": "0.8.20",
+  "solcLongVersion": "0.8.20+commit.a1b79de6",
+  "userSourceNameMap": {
+    "contracts/JRC20.sol": "project/contracts/JRC20.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "shanghai",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/JRC20.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.20;\r\n\r\ncontract JRC20 {\r\n    string public name;\r\n    string public symbol;\r\n    uint8 public decimals;\r\n    uint256 public totalSupply;\r\n\r\n    address public treasury;\r\n\r\n    mapping(address => uint256) public balanceOf;\r\n    mapping(address => mapping(address => uint256)) public allowance;\r\n\r\n    event Transfer(address indexed from, address indexed to, uint256 value);\r\n    event Approval(address indexed owner, address indexed spender, uint256 value);\r\n\r\n    modifier onlyTreasury() {\r\n        require(msg.sender == treasury, \"Not treasury\");\r\n        _;\r\n    }\r\n\r\n    constructor(\r\n        string memory _name,\r\n        string memory _symbol,\r\n        uint8 _decimals,\r\n        uint256 _initialSupply,\r\n        address _treasury\r\n    ) {\r\n        name = _name;\r\n        symbol = _symbol;\r\n        decimals = _decimals;\r\n        treasury = _treasury;\r\n\r\n        _mint(_treasury, _initialSupply);\r\n    }\r\n\r\n    function _mint(address to, uint256 amount) internal {\r\n        totalSupply += amount;\r\n        balanceOf[to] += amount;\r\n        emit Transfer(address(0), to, amount);\r\n    }\r\n\r\n    function mint(address to, uint256 amount) external onlyTreasury {\r\n        _mint(to, amount);\r\n    }\r\n\r\n    function transfer(address to, uint256 amount) external returns (bool) {\r\n        _transfer(msg.sender, to, amount);\r\n        return true;\r\n    }\r\n\r\n    function approve(address spender, uint256 amount) external returns (bool) {\r\n        allowance[msg.sender][spender] = amount;\r\n        emit Approval(msg.sender, spender, amount);\r\n        return true;\r\n    }\r\n\r\n    function transferFrom(\r\n        address from,\r\n        address to,\r\n        uint256 amount\r\n    ) external returns (bool) {\r\n        uint256 allowed = allowance[from][msg.sender];\r\n        require(allowed >= amount, \"Allowance exceeded\");\r\n\r\n        allowance[from][msg.sender] = allowed - amount;\r\n        _transfer(from, to, amount);\r\n        return true;\r\n    }\r\n\r\n    function _transfer(address from, address to, uint256 amount) internal {\r\n        require(balanceOf[from] >= amount, \"Insufficient balance\");\r\n\r\n        balanceOf[from] -= amount;\r\n        balanceOf[to] += amount;\r\n        emit Transfer(from, to, amount);\r\n    }\r\n}\r\n\r\n"
+      }
+    }
+  }
+}

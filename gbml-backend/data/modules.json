@@ -1,0 +1,32 @@
+{
+  "02a03603-a0a5-44da-8728-23ad15aa94f0": {
+    "moduleId": "02a03603-a0a5-44da-8728-23ad15aa94f0",
+    "tenantId": "tenant-001",
+    "tokenAddress": "0x4f34Af847757a8795Da291C291c8D2276BbCae0c",
+    "tokenMode": "DEPLOY",
+    "tokenConfig": {
+      "mode": "DEPLOY",
+      "name": "Acme USD",
+      "symbol": "AUSD",
+      "decimals": 17,
+      "initialSupply": "100",
+      "treasuryAddress": "0x40eFf8C0b6eCEb8430737104BaF0620F7e177A26"
+    },
+    "createdAt": "2026-01-11T06:41:19.584Z"
+  },
+  "5a9d48c2-48d7-41fc-84cd-cf071aa6a1b9": {
+    "moduleId": "5a9d48c2-48d7-41fc-84cd-cf071aa6a1b9",
+    "tenantId": "tenant-001",
+    "tokenAddress": "0xbd0d98f28a57B9c6185B40e717aE003471e2Ca37",
+    "tokenMode": "DEPLOY",
+    "tokenConfig": {
+      "mode": "DEPLOY",
+      "name": "TEST ABC",
+      "symbol": "TST",
+      "decimals": 18,
+      "initialSupply": "100",
+      "treasuryAddress": "0x40eFf8C0b6eCEb8430737104BaF0620F7e177A26"
+    },
+    "createdAt": "2026-01-11T06:48:29.928Z"
+  }
+}
