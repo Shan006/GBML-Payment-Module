@@ -28,5 +28,20 @@
       "treasuryAddress": "0x40eFf8C0b6eCEb8430737104BaF0620F7e177A26"
     },
     "createdAt": "2026-01-11T06:48:29.928Z"
+  },
+  "9cb14f84-f91a-4d9a-998c-1389abf688c3": {
+    "moduleId": "9cb14f84-f91a-4d9a-998c-1389abf688c3",
+    "tenantId": "tenant-001",
+    "tokenAddress": "0xf9c2898adfE90FD415C7Cc249D9AfCa8BB2cCb5E",
+    "tokenMode": "DEPLOY",
+    "tokenConfig": {
+      "mode": "DEPLOY",
+      "name": "JD Token",
+      "symbol": "JD",
+      "decimals": 18,
+      "initialSupply": "100",
+      "treasuryAddress": "0x40eFf8C0b6eCEb8430737104BaF0620F7e177A26"
+    },
+    "createdAt": "2026-01-11T17:28:53.538Z"
   }
 }
