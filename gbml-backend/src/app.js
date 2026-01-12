@@ -1,14 +1,22 @@
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
 import paymentsRoutes from "./routes/payments.routes.js";
+import fiatRoutes from "./routes/fiat.routes.js";
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+
+// Special parser for Stripe webhooks (need raw body)
+app.use(express.json({
+  verify: (req, res, buf) => {
+    if (req.originalUrl.includes('/fiat/webhook')) {
+      req.rawBody = buf;
+    }
+  }
+}));
+app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
 app.get("/health", (req, res) => {
@@ -17,6 +25,7 @@ app.get("/health", (req, res) => {
 
 // API routes
 app.use("/gbml", paymentsRoutes);
+app.use("/gbml", fiatRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

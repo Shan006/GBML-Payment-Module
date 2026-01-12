@@ -128,3 +128,123 @@ export function getModulesByTenant(tenantId) {
   );
 }
 
+/**
+ * Get module by token symbol
+ * @param {string} tokenSymbol - Token symbol (e.g., "JD", "AUSD")
+ * @returns {Object|null} Module data or null
+ */
+export function getModuleByTokenSymbol(tokenSymbol) {
+  const symbolUpper = tokenSymbol.toUpperCase();
+  const matchingModules = Array.from(modules.values()).filter(
+    (module) => module.tokenConfig?.symbol?.toUpperCase() === symbolUpper
+  );
+
+  if (matchingModules.length === 0) {
+    return null;
+  }
+
+  if (matchingModules.length > 1) {
+    throw new Error(`Multiple modules found with token symbol: ${tokenSymbol}. Token symbols must be unique.`);
+  }
+
+  return matchingModules[0];
+}
+
+/**
+ * Get all available tokens
+ * @returns {Array} Array of token information
+ */
+export function getAllTokens() {
+  return Array.from(modules.values()).map((module) => ({
+    symbol: module.tokenConfig?.symbol,
+    name: module.tokenConfig?.name,
+    address: module.tokenAddress,
+    decimals: module.tokenConfig?.decimals,
+    moduleId: module.moduleId,
+  }));
+}
+
+/**
+ * Update module exchange rates
+ * @param {string} moduleId - Module ID
+ * @param {Object} exchangeRates - Exchange rates object
+ */
+export function updateModuleExchangeRates(moduleId, exchangeRates) {
+  const module = modules.get(moduleId);
+  if (!module) {
+    throw new Error(`Module not found: ${moduleId}`);
+  }
+
+  modules.set(moduleId, {
+    ...module,
+    exchangeRates,
+    updatedAt: new Date().toISOString(),
+  });
+  saveToFile(MODULES_FILE, modules);
+}
+
+// Fiat transactions storage
+const FIAT_TRANSACTIONS_FILE = path.join(DATA_DIR, 'fiat-transactions.json');
+let fiatTransactions = new Map();
+
+// Load fiat transactions on initialization
+function initializeFiatTransactions() {
+  fiatTransactions = loadFromFile(FIAT_TRANSACTIONS_FILE);
+  console.log(`Fiat transactions initialized: ${fiatTransactions.size} transactions loaded`);
+}
+
+// Initialize fiat transactions
+initializeFiatTransactions();
+
+/**
+ * Store fiat transaction
+ * @param {string} paymentIntentId - Stripe payment intent ID
+ * @param {Object} txData - Transaction data
+ */
+export function storeFiatTransaction(paymentIntentId, txData) {
+  fiatTransactions.set(paymentIntentId, {
+    ...txData,
+    createdAt: new Date().toISOString(),
+  });
+  saveToFile(FIAT_TRANSACTIONS_FILE, fiatTransactions);
+}
+
+/**
+ * Get fiat transaction by payment intent ID
+ * @param {string} paymentIntentId - Payment intent ID
+ * @returns {Object|null} Transaction data or null
+ */
+export function getFiatTransaction(paymentIntentId) {
+  return fiatTransactions.get(paymentIntentId) || null;
+}
+
+/**
+ * Update fiat transaction
+ * @param {string} paymentIntentId - Payment intent ID
+ * @param {Object} updates - Updates to apply
+ */
+export function updateFiatTransaction(paymentIntentId, updates) {
+  const existing = fiatTransactions.get(paymentIntentId);
+  if (!existing) {
+    throw new Error(`Fiat transaction not found: ${paymentIntentId}`);
+  }
+
+  fiatTransactions.set(paymentIntentId, {
+    ...existing,
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  });
+  saveToFile(FIAT_TRANSACTIONS_FILE, fiatTransactions);
+}
+
+/**
+ * Get fiat transactions by module ID
+ * @param {string} moduleId - Module ID
+ * @returns {Array} Array of fiat transactions
+ */
+export function getFiatTransactionsByModule(moduleId) {
+  return Array.from(fiatTransactions.values()).filter(
+    (tx) => tx.moduleId === moduleId
+  );
+}
+

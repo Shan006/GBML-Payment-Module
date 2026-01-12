@@ -2,22 +2,17 @@ import { useState, useEffect } from 'react'
 import ModuleList from './components/ModuleList'
 import AddModule from './components/AddModule'
 import SendPayment from './components/SendPayment'
+import FiatPayment from './components/FiatPayment'
 import './App.css'
 
 function App() {
   const [selectedModule, setSelectedModule] = useState(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [activeTab, setActiveTab] = useState('standard')
 
   const handleModuleAdded = (newModule) => {
     // Trigger refresh of module list
     setRefreshTrigger(prev => prev + 1)
-    // Optionally select the newly added module
-    if (newModule.moduleId) {
-      setTimeout(() => {
-        // The ModuleList will refresh, so we need to select it after refresh
-        // For now, just refresh the list
-      }, 500)
-    }
   }
 
   const handleSelectModule = (module) => {
@@ -30,32 +25,77 @@ function App() {
         <h1>GBML Payments Module (JRC-20)</h1>
         <p>Blockchain Payments Management System</p>
       </header>
-      
+
       <main className="App-main">
-        <div className="modules-section">
-          <div className="section-header">
-            <h2>Payment Modules</h2>
-            <AddModule onModuleAdded={handleModuleAdded} />
-          </div>
-          
-          <ModuleList 
-            onSelectModule={handleSelectModule}
-            selectedModuleId={selectedModule?.moduleId}
-            refreshTrigger={refreshTrigger}
-          />
+        <div className="tabs-container" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '1rem' }}>
+          <button
+            className={`tab-button ${activeTab === 'standard' ? 'active' : ''}`}
+            onClick={() => setActiveTab('standard')}
+            style={{
+              padding: '1rem 2rem',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              background: activeTab === 'standard' ? 'white' : 'rgba(255,255,255,0.2)',
+              color: activeTab === 'standard' ? '#764ba2' : 'white',
+              fontWeight: 600,
+              fontSize: '1.1rem',
+              transition: 'all 0.3s'
+            }}
+          >
+            Token Transfers
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'fiat' ? 'active' : ''}`}
+            onClick={() => setActiveTab('fiat')}
+            style={{
+              padding: '1rem 2rem',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              background: activeTab === 'fiat' ? 'white' : 'rgba(255,255,255,0.2)',
+              color: activeTab === 'fiat' ? '#764ba2' : 'white',
+              fontWeight: 600,
+              fontSize: '1.1rem',
+              transition: 'all 0.3s'
+            }}
+          >
+            Fiat Gateway (USD/EUR)
+          </button>
         </div>
 
-        {selectedModule && (
-          <div className="payment-section">
-            <SendPayment 
-              module={selectedModule}
-            />
-          </div>
-        )}
+        {activeTab === 'standard' ? (
+          <>
+            <div className="modules-section">
+              <div className="section-header">
+                <h2>Payment Modules</h2>
+                <AddModule onModuleAdded={handleModuleAdded} />
+              </div>
 
-        {!selectedModule && (
-          <div className="no-selection">
-            <p>Select a payment module from the list above to send payments</p>
+              <ModuleList
+                onSelectModule={handleSelectModule}
+                selectedModuleId={selectedModule?.moduleId}
+                refreshTrigger={refreshTrigger}
+              />
+            </div>
+
+            {selectedModule && (
+              <div className="payment-section">
+                <SendPayment
+                  module={selectedModule}
+                />
+              </div>
+            )}
+
+            {!selectedModule && (
+              <div className="no-selection">
+                <p>Select a payment module from the list above to send payments</p>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="payment-section">
+            <FiatPayment />
           </div>
         )}
       </main>

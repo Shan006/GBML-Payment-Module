@@ -2,44 +2,54 @@ import { ethers } from "ethers";
 import { attachJRC20 } from "./token.service.js";
 
 /**
- * Send payment (JRC-20 transfer)
+ * Send payment (JRC-20 transfer or mint)
  * @param {string} tokenAddress - Token contract address
  * @param {string} to - Recipient address
- * @param {string} amount - Amount to transfer (as string, in token units)
- * @param {number} decimals - Token decimals (optional, defaults to 18)
+ * @param {string} amount - Amount to transfer (as string, in token units or wei)
+ * @param {number} decimals - Token decimals (optional)
  * @returns {Promise<ethers.TransactionReceipt>} Transaction receipt
  */
 export async function sendPayment(tokenAddress, to, amount, decimals = 18) {
   const token = attachJRC20(tokenAddress);
-  
-  // If decimals not provided, read from contract
+
+  // 1. Determine decimals
   let tokenDecimals = decimals;
   if (!tokenDecimals || tokenDecimals === 18) {
     try {
       tokenDecimals = await token.decimals();
     } catch (err) {
-      // Fallback to provided decimals or 18
       tokenDecimals = decimals || 18;
     }
   }
-  
-  // Convert amount to BigNumber
-  // Amount can be either:
-  // - Decimal string (e.g., "0.001", "1.5") - will be converted using parseUnits with token decimals
-  // - Integer string in wei (e.g., "1000000000000000") - will be parsed as BigInt
+
+  // 2. Convert amount to BigInt (wei units)
   let amountBN;
   if (amount.toString().includes('.')) {
-    // Decimal format - convert using parseUnits with token decimals
     amountBN = ethers.parseUnits(amount.toString(), tokenDecimals);
   } else {
-    // Already in wei format - convert to BigInt
     amountBN = BigInt(amount.toString());
   }
-  
-  // For MVP, we'll use the treasury signer directly
-  // In production, you might want to check authorization
-  const tx = await token.transfer(to, amountBN);
-  
+
+  // 3. Check treasury balance
+  const treasuryAddress = await token.treasury();
+  const balance = await token.balanceOf(treasuryAddress);
+
+  let tx;
+  if (balance >= amountBN) {
+    // Sufficient balance - Transfer from treasury
+    console.log(`[Router] Sufficient treasury balance. Transferring ${amountBN} to ${to}`);
+    tx = await token.transfer(to, amountBN);
+  } else {
+    // Insufficient balance - Attempt to mint
+    console.log(`[Router] Insufficient treasury balance (${balance} < ${amountBN}). Attempting to mint.`);
+    try {
+      tx = await token.mint(to, amountBN);
+    } catch (err) {
+      console.error(`[Router] Minting failed: ${err.message}. Trying transfer anyway (might fail).`);
+      tx = await token.transfer(to, amountBN);
+    }
+  }
+
   return await tx.wait();
 }
 

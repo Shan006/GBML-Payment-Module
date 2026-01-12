@@ -95,11 +95,13 @@ The backend should be running at `http://localhost:3000`.
 - **Send Payment**: Transfer JRC-20 tokens
 - **Get Balance**: Check token balance for an address
 - **Module Status**: Get module information
+- **Fiat Gateway**: Convert Fiat (USD/EUR) to tokens via Stripe
 
 ### Frontend
 
 - **Enable Payments**: Deploy a new JRC-20 token contract
 - **Send Payment**: Send JRC-20 tokens to any address
+- **Fiat Gateway**: Buy tokens using credit card (USD/EUR)
 - **Transaction Tracking**: View transaction hashes and status
 
 ## API Endpoints
@@ -132,6 +134,19 @@ Content-Type: application/json
   "to": "0x...",
   "amount": "1000000000000000000",
   "moduleId": "module-id"
+}
+```
+
+### Fiat Gateway (USD/EUR)
+```
+POST /gbml/fiat/payment/create
+Content-Type: application/json
+
+{
+  "token": "aUSD",
+  "currency": "USD",
+  "amount": 100,
+  "recipientAddress": "0x..."
 }
 ```
 
