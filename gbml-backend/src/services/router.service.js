@@ -24,10 +24,12 @@ export async function sendPayment(tokenAddress, to, amount, decimals = 18) {
 
   // 2. Convert amount to BigInt (wei units)
   let amountBN;
-  if (amount.toString().includes('.')) {
-    amountBN = ethers.parseUnits(amount.toString(), tokenDecimals);
-  } else {
+  try {
+    // Try to parse as a direct integer (units/wei)
     amountBN = BigInt(amount.toString());
+  } catch (err) {
+    // If it contains a decimal or is not a simple integer, parse as token units
+    amountBN = ethers.parseUnits(amount.toString(), tokenDecimals);
   }
 
   // 3. Check treasury balance

@@ -27,12 +27,9 @@ export async function processFiatPaymentSuccess({
 }) {
     try {
         // Convert fiat to token amount
-        const tokenAmountRaw = convertFiatToToken(fiatAmount, currency, moduleId);
+        const tokenAmount = convertFiatToToken(fiatAmount, currency, moduleId);
 
-        // Convert to wei (considering token decimals)
-        const tokenAmount = ethers.parseUnits(tokenAmountRaw, tokenDecimals).toString();
-
-        console.log(`[Fiat Gateway] Converting ${fiatAmount} ${currency} to ${tokenAmountRaw} tokens (${tokenAmount} wei)`);
+        console.log(`[Fiat Gateway] Converting ${fiatAmount} ${currency} to ${tokenAmount} tokens`);
 
         // Send tokens to recipient
         const receipt = await sendPayment(tokenAddress, recipientAddress, tokenAmount, tokenDecimals);
@@ -42,8 +39,7 @@ export async function processFiatPaymentSuccess({
             status: 'completed',
             blockchainTxHash: receipt.hash,
             blockNumber: receipt.blockNumber,
-            tokenAmount: tokenAmountRaw,
-            tokenAmountWei: tokenAmount,
+            tokenAmount: tokenAmount,
         });
 
         // Log the transaction
@@ -66,7 +62,7 @@ export async function processFiatPaymentSuccess({
             success: true,
             blockchainTxHash: receipt.hash,
             blockNumber: receipt.blockNumber,
-            tokenAmount: tokenAmountRaw,
+            tokenAmount: tokenAmount,
             fiatAmount,
             currency,
         };

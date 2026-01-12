@@ -41,5 +41,21 @@
     "tokenAmount": "5",
     "tokenAmountWei": "5000000000000000000",
     "updatedAt": "2026-01-12T05:50:56.160Z"
+  },
+  "pi_3SoeA6LqpdOS2y1x0VmFzCz9": {
+    "paymentIntentId": "pi_3SoeA6LqpdOS2y1x0VmFzCz9",
+    "moduleId": "02a03603-a0a5-44da-8728-23ad15aa94f0",
+    "tokenSymbol": "AUSD",
+    "tokenAddress": "0x4f34Af847757a8795Da291C291c8D2276BbCae0c",
+    "recipientAddress": "0x2B060a7225c92a4ABb5f6DC8F2D1f196df974CBA",
+    "fiatAmount": 5,
+    "currency": "USD",
+    "tokenDecimals": 17,
+    "status": "completed",
+    "blockchainTxHash": "0xfac18c8b97f5ed93227169182c7435e0415611a50270eafaa46d587f3c462d6c",
+    "createdAt": "2026-01-12T05:59:37.169Z",
+    "blockNumber": 10026439,
+    "tokenAmount": "5",
+    "updatedAt": "2026-01-12T06:00:28.049Z"
   }
 }
