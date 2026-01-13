@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import EmergencyPauseButton from './EmergencyPauseButton'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/gbml'
 const TENANT_ID = 'tenant-001' // In production, this would come from auth context
 
-export default function ModuleList({ onSelectModule, selectedModuleId, refreshTrigger }) {
+export default function ModuleList({ onSelectModule, selectedModuleId, refreshTrigger, role }) {
   const [modules, setModules] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -58,10 +59,18 @@ export default function ModuleList({ onSelectModule, selectedModuleId, refreshTr
             >
               <div className="module-card-header">
                 <h3>{module.tokenConfig?.name || 'Unnamed Token'}</h3>
-                <span className="module-status">Active</span>
+                <div>
+                  <span className="module-status">Active</span>
+                </div>
               </div>
               <div className="module-card-body">
                 <p><strong>Symbol:</strong> {module.tokenConfig?.symbol || 'N/A'}</p>
+                {role === 'admin' && (
+                  <div className="admin-actions" onClick={(e) => e.stopPropagation()} style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                    <EmergencyPauseButton scope="MODULE" targetId={module.moduleId} label="Module" />
+                    <EmergencyPauseButton scope="TOKEN" targetId={module.tokenAddress} label="Token" />
+                  </div>
+                )}
                 <p><strong>Decimals:</strong> {module.tokenConfig?.decimals || 'N/A'}</p>
                 <p><strong>Token Address:</strong></p>
                 <p className="token-address">{module.tokenAddress}</p>

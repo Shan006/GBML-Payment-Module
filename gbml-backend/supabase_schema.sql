@@ -60,5 +60,19 @@ CREATE TABLE IF NOT EXISTS public.fiat_transactions (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable RLS on other tables (optional, for now we let the backend service role handle it)
--- For the backend to work with service role, it bypasses RLS.
+
+-- Pause States table to track emergency pauses
+CREATE TABLE IF NOT EXISTS public.pause_states (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  scope TEXT NOT NULL CHECK (scope IN ('GLOBAL', 'MODULE', 'TOKEN')),
+  target_id TEXT DEFAULT 'ALL', -- Module ID, Token Address, or 'ALL' for GLOBAL
+  is_paused BOOLEAN DEFAULT TRUE,
+  reason TEXT,
+  admin_id UUID REFERENCES auth.users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE (scope, target_id)
+);
+
+-- Enable RLS on pause_states
+ALTER TABLE public.pause_states ENABLE ROW LEVEL SECURITY;

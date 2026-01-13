@@ -19,10 +19,10 @@ export async function logPaymentTransaction(data) {
     timestamp: new Date().toISOString(),
     ...data,
   };
-  
+
   // In production, save to database
   console.log("[AUDIT] Payment Transaction:", JSON.stringify(logEntry, null, 2));
-  
+
   return logEntry;
 }
 
@@ -40,10 +40,10 @@ export async function logModuleEnable(data) {
     timestamp: new Date().toISOString(),
     ...data,
   };
-  
+
   // In production, save to database
   console.log("[AUDIT] Module Enabled:", JSON.stringify(logEntry, null, 2));
-  
+
   return logEntry;
 }
 
@@ -60,9 +60,25 @@ export async function logError(data) {
     timestamp: new Date().toISOString(),
     ...data,
   };
-  
+
   console.error("[AUDIT] Error:", JSON.stringify(logEntry, null, 2));
-  
+
+  return logEntry;
+}
+
+/**
+ * Log pause/unpause action
+ * @param {Object} data - Pause event data
+ */
+export async function logPauseAction(data) {
+  const logEntry = {
+    type: "pause_action",
+    timestamp: new Date().toISOString(),
+    ...data,
+  };
+
+  console.log("[AUDIT] Pause Action:", JSON.stringify(logEntry, null, 2));
+
   return logEntry;
 }
 

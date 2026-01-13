@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import paymentsRoutes from "./routes/payments.routes.js";
 import fiatRoutes from "./routes/fiat.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.get("/health", (req, res) => {
 // API routes
 app.use("/gbml", paymentsRoutes);
 app.use("/gbml", fiatRoutes);
+app.use("/gbml", adminRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

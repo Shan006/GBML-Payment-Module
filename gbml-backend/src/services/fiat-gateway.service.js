@@ -2,6 +2,7 @@ import { sendPayment } from './router.service.js';
 import { convertFiatToToken } from './currency.service.js';
 import { storeFiatTransaction, updateFiatTransaction } from '../db/index.js';
 import { logPaymentTransaction, logError } from './audit.service.js';
+import { isPaused } from './pause.service.js';
 import { ethers } from 'ethers';
 
 /**
@@ -30,6 +31,25 @@ export async function processFiatPaymentSuccess({
         const tokenAmount = await convertFiatToToken(fiatAmount, currency, moduleId);
 
         console.log(`[Fiat Gateway] Converting ${fiatAmount} ${currency} to ${tokenAmount} tokens`);
+
+        // NEW: Check if paused before sending payment
+        if (await isPaused('MODULE', moduleId) || await isPaused('TOKEN', tokenAddress)) {
+            console.warn(`[Fiat Gateway] PAUSE ACTIVE: Holding payment ${paymentIntentId} for module ${moduleId}`);
+
+            await updateFiatTransaction(paymentIntentId, {
+                status: 'on-hold',
+                tokenAmount: tokenAmount
+            });
+
+            return {
+                success: false,
+                status: 'on-hold',
+                message: 'System is currently paused. Payment received and held for review.',
+                tokenAmount,
+                fiatAmount,
+                currency
+            };
+        }
 
         // Send tokens to recipient
         const receipt = await sendPayment(tokenAddress, recipientAddress, tokenAmount, tokenDecimals);
@@ -118,6 +138,11 @@ export async function initializeFiatPayment({
     paymentIntentId,
     tokenDecimals,
 }) {
+    // NEW: Block new payments if paused
+    if (await isPaused('MODULE', moduleId) || await isPaused('TOKEN', tokenAddress)) {
+        throw new Error('Payments are currently suspended for this module/token.');
+    }
+
     // Store fiat transaction in pending state
     await storeFiatTransaction(paymentIntentId, {
         paymentIntentId,

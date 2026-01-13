@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import { attachJRC20 } from "./token.service.js";
+import { isPaused } from "./pause.service.js";
 
 /**
  * Send payment (JRC-20 transfer or mint)
@@ -10,6 +11,11 @@ import { attachJRC20 } from "./token.service.js";
  * @returns {Promise<ethers.TransactionReceipt>} Transaction receipt
  */
 export async function sendPayment(tokenAddress, to, amount, decimals = 18) {
+  // NEW: Check if paused before any transaction
+  if (await isPaused('TOKEN', tokenAddress)) {
+    throw new Error(`Token operations for ${tokenAddress} are currently PAUSED.`);
+  }
+
   const token = attachJRC20(tokenAddress);
 
   // 1. Determine decimals

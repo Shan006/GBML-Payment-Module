@@ -4,6 +4,7 @@ import AddModule from './components/AddModule'
 import SendPayment from './components/SendPayment'
 import FiatPayment from './components/FiatPayment'
 import Login from './components/Login'
+import EmergencyPauseButton from './components/EmergencyPauseButton'
 import { supabase } from './supabase'
 import axios from 'axios'
 import './App.css'
@@ -92,6 +93,13 @@ function App() {
             cursor: 'pointer'
           }}>Logout</button>
         </div>
+
+        {role === 'admin' && (
+          <div style={{ position: 'absolute', top: '1rem', left: '1rem' }}>
+            <EmergencyPauseButton scope="GLOBAL" label="GLOBAL SYSTEM" />
+          </div>
+        )}
+
         <h1>GBML Payments Module (JRC-20)</h1>
         <p>Blockchain Payments Management System</p>
       </header>
@@ -146,6 +154,7 @@ function App() {
                 onSelectModule={handleSelectModule}
                 selectedModuleId={selectedModule?.moduleId}
                 refreshTrigger={refreshTrigger}
+                role={role}
               />
             </div>
 
