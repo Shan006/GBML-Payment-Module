@@ -5,9 +5,9 @@ import { getModule } from '../db/index.js';
  * Get exchange rate for a module and currency
  * @param {string} moduleId - Module ID
  * @param {string} currency - Currency code (USD, EUR)
- * @returns {number} Exchange rate (fiat to token)
+ * @returns {Promise<number>} Exchange rate (fiat to token)
  */
-export function getExchangeRate(moduleId, currency) {
+export async function getExchangeRate(moduleId, currency) {
     const currencyUpper = currency.toUpperCase();
 
     if (!isSupportedCurrency(currencyUpper)) {
@@ -15,7 +15,7 @@ export function getExchangeRate(moduleId, currency) {
     }
 
     // Get module to check for custom rates
-    const module = getModule(moduleId);
+    const module = await getModule(moduleId);
     if (!module) {
         throw new Error(`Module not found: ${moduleId}`);
     }
@@ -34,10 +34,10 @@ export function getExchangeRate(moduleId, currency) {
  * @param {number} fiatAmount - Fiat amount
  * @param {string} currency - Currency code (USD, EUR)
  * @param {string} moduleId - Module ID
- * @returns {string} Token amount as string
+ * @returns {Promise<string>} Token amount as string
  */
-export function convertFiatToToken(fiatAmount, currency, moduleId) {
-    const rate = getExchangeRate(moduleId, currency);
+export async function convertFiatToToken(fiatAmount, currency, moduleId) {
+    const rate = await getExchangeRate(moduleId, currency);
     const tokenAmount = fiatAmount * rate;
     return tokenAmount.toString();
 }
@@ -45,10 +45,10 @@ export function convertFiatToToken(fiatAmount, currency, moduleId) {
 /**
  * Get all exchange rates for a module
  * @param {string} moduleId - Module ID
- * @returns {Object} Exchange rates object
+ * @returns {Promise<Object>} Exchange rates object
  */
-export function getModuleExchangeRates(moduleId) {
-    const module = getModule(moduleId);
+export async function getModuleExchangeRates(moduleId) {
+    const module = await getModule(moduleId);
     if (!module) {
         throw new Error(`Module not found: ${moduleId}`);
     }

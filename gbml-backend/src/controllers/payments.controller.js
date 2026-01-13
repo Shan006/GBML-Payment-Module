@@ -44,7 +44,7 @@ export async function enablePayments(req, res) {
 
     // Persist module state (DB)
     const moduleId = uuid();
-    storeModule(moduleId, {
+    await storeModule(moduleId, {
       moduleId,
       tenantId: config.tenantId,
       tokenAddress,
@@ -98,7 +98,7 @@ export async function sendPaymentController(req, res) {
     }
 
     // Get module to verify it exists and get token decimals
-    const module = moduleId ? getModule(moduleId) : null;
+    const module = moduleId ? await getModule(moduleId) : null;
     if (moduleId && !module) {
       return res.status(404).json({ error: "Module not found" });
     }
@@ -166,7 +166,7 @@ export async function getModuleStatus(req, res) {
   const { moduleId } = req.params;
 
   try {
-    const module = getModule(moduleId);
+    const module = await getModule(moduleId);
     if (!module) {
       return res.status(404).json({ error: "Module not found" });
     }
@@ -193,7 +193,7 @@ export async function listModules(req, res) {
       return res.status(400).json({ error: "tenantId query parameter is required" });
     }
 
-    const modules = getModulesByTenant(tenantId);
+    const modules = await getModulesByTenant(tenantId);
     return res.json({
       modules,
       count: modules.length,

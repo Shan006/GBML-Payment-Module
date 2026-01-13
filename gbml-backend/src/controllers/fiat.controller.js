@@ -22,7 +22,7 @@ export async function createFiatPaymentIntent(req, res) {
         }
 
         // 2. Lookup module by token symbol
-        const module = getModuleByTokenSymbol(token);
+        const module = await getModuleByTokenSymbol(token);
         if (!module) {
             return res.status(404).json({ error: `Token symbol not found: ${token}` });
         }
@@ -41,7 +41,7 @@ export async function createFiatPaymentIntent(req, res) {
         });
 
         // 4. Initialize transaction in DB (pending state)
-        initializeFiatPayment({
+        await initializeFiatPayment({
             moduleId: module.moduleId,
             tokenSymbol: token,
             tokenAddress: module.tokenAddress,
@@ -58,7 +58,7 @@ export async function createFiatPaymentIntent(req, res) {
             paymentIntentId: paymentIntent.id,
             tokenSymbol: token,
             tokenAddress: module.tokenAddress,
-            exchangeRates: getModuleExchangeRates(module.moduleId),
+            exchangeRates: await getModuleExchangeRates(module.moduleId),
             status: 'pending'
         });
     } catch (error) {
@@ -128,7 +128,7 @@ export async function getFiatTransactionStatus(req, res) {
     const { paymentIntentId } = req.params;
 
     try {
-        const transaction = getFiatTransaction(paymentIntentId);
+        const transaction = await getFiatTransaction(paymentIntentId);
         if (!transaction) {
             return res.status(404).json({ error: 'Transaction not found' });
         }
@@ -146,7 +146,7 @@ export async function getFiatTransactionStatus(req, res) {
  */
 export async function listAvailableTokens(req, res) {
     try {
-        const tokens = getAllTokens();
+        const tokens = await getAllTokens();
         return res.json({ tokens });
     } catch (error) {
         console.error('Error listing tokens:', error);
@@ -168,12 +168,12 @@ export async function updateExchangeRates(req, res) {
         }
 
         // Verify module exists
-        const module = getModule(moduleId);
+        const module = await getModule(moduleId);
         if (!module) {
             return res.status(404).json({ error: 'Module not found' });
         }
 
-        updateRatesInDb(moduleId, rates);
+        await updateRatesInDb(moduleId, rates);
         return res.json({ status: 'success', moduleId, rates });
     } catch (error) {
         console.error('Error updating exchange rates:', error);
@@ -189,7 +189,7 @@ export async function getExchangeRates(req, res) {
     const { moduleId } = req.params;
 
     try {
-        const rates = getModuleExchangeRates(moduleId);
+        const rates = await getModuleExchangeRates(moduleId);
         return res.json({ moduleId, rates });
     } catch (error) {
         console.error('Error getting exchange rates:', error);

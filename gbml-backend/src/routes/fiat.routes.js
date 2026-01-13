@@ -7,6 +7,7 @@ import {
     updateExchangeRates,
     getExchangeRates
 } from '../controllers/fiat.controller.js';
+import { authenticate, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -15,20 +16,19 @@ const router = express.Router();
  */
 
 // Create fiat payment intent
-router.post('/fiat/payment/create', createFiatPaymentIntent);
+router.post('/fiat/payment/create', authenticate, createFiatPaymentIntent);
 
-// Stripe webhook handler
-// Note: Raw body is captured in app.js via the express.json verify hook
+// Stripe webhook handler - PUBLIC (handled by Stripe)
 router.post('/fiat/webhook', handleStripeWebhook);
 
 // Get fiat transaction status
-router.get('/fiat/transaction/:paymentIntentId', getFiatTransactionStatus);
+router.get('/fiat/transaction/:paymentIntentId', authenticate, getFiatTransactionStatus);
 
 // List available tokens
-router.get('/tokens', listAvailableTokens);
+router.get('/tokens', authenticate, listAvailableTokens);
 
 // Module-specific exchange rates
-router.get('/modules/payments/:moduleId/rates', getExchangeRates);
-router.put('/modules/payments/:moduleId/rates', updateExchangeRates);
+router.get('/modules/payments/:moduleId/rates', authenticate, getExchangeRates);
+router.put('/modules/payments/:moduleId/rates', authenticate, authorize(['admin']), updateExchangeRates);
 
 export default router;

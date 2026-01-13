@@ -1,89 +1,31 @@
 /**
- * Database abstraction layer
- * In production, this would connect to a real database (PostgreSQL, MongoDB, etc.)
- * For MVP, using file-based JSON storage for persistence
+ * Database abstraction layer using Supabase
  */
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Data directory for storing JSON files
-const DATA_DIR = path.join(__dirname, '../../data');
-const MODULES_FILE = path.join(DATA_DIR, 'modules.json');
-const TRANSACTIONS_FILE = path.join(DATA_DIR, 'transactions.json');
-
-// In-memory cache (loaded from files)
-let modules = new Map();
-let transactions = new Map();
-
-/**
- * Ensure data directory exists
- */
-function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-}
-
-/**
- * Load data from JSON file
- * @param {string} filePath - Path to JSON file
- * @returns {Map} Map of data
- */
-function loadFromFile(filePath) {
-  try {
-    if (fs.existsSync(filePath)) {
-      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-      return new Map(Object.entries(data));
-    }
-  } catch (error) {
-    console.error(`Error loading data from ${filePath}:`, error);
-  }
-  return new Map();
-}
-
-/**
- * Save data to JSON file
- * @param {string} filePath - Path to JSON file
- * @param {Map} dataMap - Map of data to save
- */
-function saveToFile(filePath, dataMap) {
-  try {
-    const data = Object.fromEntries(dataMap);
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
-  } catch (error) {
-    console.error(`Error saving data to ${filePath}:`, error);
-  }
-}
-
-/**
- * Initialize database - load existing data from files
- */
-function initializeDatabase() {
-  ensureDataDir();
-  modules = loadFromFile(MODULES_FILE);
-  transactions = loadFromFile(TRANSACTIONS_FILE);
-  console.log(`Database initialized: ${modules.size} modules, ${transactions.size} transactions loaded`);
-}
-
-// Initialize on module load
-initializeDatabase();
+import { supabase } from '../config/supabase.js';
 
 /**
  * Store module configuration
  * @param {string} moduleId - Module ID
  * @param {Object} moduleData - Module data
  */
-export function storeModule(moduleId, moduleData) {
-  modules.set(moduleId, {
-    ...moduleData,
-    createdAt: new Date().toISOString(),
-  });
-  saveToFile(MODULES_FILE, modules);
+export async function storeModule(moduleId, moduleData) {
+  const { data, error } = await supabase
+    .from('modules')
+    .upsert({
+      module_id: moduleId,
+      tenant_id: moduleData.tenantId,
+      token_address: moduleData.tokenAddress,
+      token_mode: moduleData.tokenMode,
+      token_config: moduleData.tokenConfig,
+      exchange_rates: moduleData.exchangeRates || {},
+      updated_at: new Date().toISOString()
+    });
+
+  if (error) {
+    console.error(`Error storing module ${moduleId}:`, error);
+    throw error;
+  }
 }
 
 /**
@@ -91,30 +33,28 @@ export function storeModule(moduleId, moduleData) {
  * @param {string} moduleId - Module ID
  * @returns {Object|null} Module data or null
  */
-export function getModule(moduleId) {
-  return modules.get(moduleId) || null;
-}
+export async function getModule(moduleId) {
+  const { data, error } = await supabase
+    .from('modules')
+    .select('*')
+    .eq('module_id', moduleId)
+    .single();
 
-/**
- * Store transaction record
- * @param {string} txHash - Transaction hash
- * @param {Object} txData - Transaction data
- */
-export function storeTransaction(txHash, txData) {
-  transactions.set(txHash, {
-    ...txData,
-    createdAt: new Date().toISOString(),
-  });
-  saveToFile(TRANSACTIONS_FILE, transactions);
-}
+  if (error) {
+    if (error.code === 'PGRST116') return null; // Not found
+    console.error(`Error getting module ${moduleId}:`, error);
+    throw error;
+  }
 
-/**
- * Get transaction by hash
- * @param {string} txHash - Transaction hash
- * @returns {Object|null} Transaction data or null
- */
-export function getTransaction(txHash) {
-  return transactions.get(txHash) || null;
+  return {
+    ...data,
+    moduleId: data.module_id,
+    tenantId: data.tenant_id,
+    tokenAddress: data.token_address,
+    tokenMode: data.token_mode,
+    tokenConfig: data.token_config,
+    exchangeRates: data.exchange_rates
+  };
 }
 
 /**
@@ -122,45 +62,82 @@ export function getTransaction(txHash) {
  * @param {string} tenantId - Tenant ID
  * @returns {Array} Array of module data
  */
-export function getModulesByTenant(tenantId) {
-  return Array.from(modules.values()).filter(
-    (module) => module.tenantId === tenantId
-  );
+export async function getModulesByTenant(tenantId) {
+  const { data, error } = await supabase
+    .from('modules')
+    .select('*')
+    .eq('tenant_id', tenantId);
+
+  if (error) {
+    console.error(`Error getting modules for tenant ${tenantId}:`, error);
+    throw error;
+  }
+
+  return data.map(item => ({
+    ...item,
+    moduleId: item.module_id,
+    tenantId: item.tenant_id,
+    tokenAddress: item.token_address,
+    tokenMode: item.token_mode,
+    tokenConfig: item.token_config,
+    exchangeRates: item.exchange_rates
+  }));
 }
 
 /**
  * Get module by token symbol
- * @param {string} tokenSymbol - Token symbol (e.g., "JD", "AUSD")
+ * @param {string} tokenSymbol - Token symbol
  * @returns {Object|null} Module data or null
  */
-export function getModuleByTokenSymbol(tokenSymbol) {
-  const symbolUpper = tokenSymbol.toUpperCase();
-  const matchingModules = Array.from(modules.values()).filter(
-    (module) => module.tokenConfig?.symbol?.toUpperCase() === symbolUpper
-  );
+export async function getModuleByTokenSymbol(tokenSymbol) {
+  // We need to query the JSONB field
+  const { data, error } = await supabase
+    .from('modules')
+    .select('*')
+    .filter('token_config->>symbol', 'eq', tokenSymbol.toUpperCase());
 
-  if (matchingModules.length === 0) {
-    return null;
+  if (error) {
+    console.error(`Error getting module by symbol ${tokenSymbol}:`, error);
+    throw error;
   }
 
-  if (matchingModules.length > 1) {
-    throw new Error(`Multiple modules found with token symbol: ${tokenSymbol}. Token symbols must be unique.`);
+  if (!data || data.length === 0) return null;
+  if (data.length > 1) {
+    throw new Error(`Multiple modules found with token symbol: ${tokenSymbol}`);
   }
 
-  return matchingModules[0];
+  const module = data[0];
+  return {
+    ...module,
+    moduleId: module.module_id,
+    tenantId: module.tenant_id,
+    tokenAddress: module.token_address,
+    tokenMode: module.token_mode,
+    tokenConfig: module.token_config,
+    exchangeRates: module.exchange_rates
+  };
 }
 
 /**
  * Get all available tokens
  * @returns {Array} Array of token information
  */
-export function getAllTokens() {
-  return Array.from(modules.values()).map((module) => ({
-    symbol: module.tokenConfig?.symbol,
-    name: module.tokenConfig?.name,
-    address: module.tokenAddress,
-    decimals: module.tokenConfig?.decimals,
-    moduleId: module.moduleId,
+export async function getAllTokens() {
+  const { data, error } = await supabase
+    .from('modules')
+    .select('*');
+
+  if (error) {
+    console.error('Error getting all tokens:', error);
+    throw error;
+  }
+
+  return data.map(module => ({
+    symbol: module.token_config?.symbol,
+    name: module.token_config?.name,
+    address: module.token_address,
+    decimals: module.token_config?.decimals,
+    moduleId: module.module_id,
   }));
 }
 
@@ -169,44 +146,50 @@ export function getAllTokens() {
  * @param {string} moduleId - Module ID
  * @param {Object} exchangeRates - Exchange rates object
  */
-export function updateModuleExchangeRates(moduleId, exchangeRates) {
-  const module = modules.get(moduleId);
-  if (!module) {
-    throw new Error(`Module not found: ${moduleId}`);
+export async function updateModuleExchangeRates(moduleId, exchangeRates) {
+  const { error } = await supabase
+    .from('modules')
+    .update({
+      exchange_rates: exchangeRates,
+      updated_at: new Date().toISOString()
+    })
+    .eq('module_id', moduleId);
+
+  if (error) {
+    console.error(`Error updating rates for ${moduleId}:`, error);
+    throw error;
   }
-
-  modules.set(moduleId, {
-    ...module,
-    exchangeRates,
-    updatedAt: new Date().toISOString(),
-  });
-  saveToFile(MODULES_FILE, modules);
 }
-
-// Fiat transactions storage
-const FIAT_TRANSACTIONS_FILE = path.join(DATA_DIR, 'fiat-transactions.json');
-let fiatTransactions = new Map();
-
-// Load fiat transactions on initialization
-function initializeFiatTransactions() {
-  fiatTransactions = loadFromFile(FIAT_TRANSACTIONS_FILE);
-  console.log(`Fiat transactions initialized: ${fiatTransactions.size} transactions loaded`);
-}
-
-// Initialize fiat transactions
-initializeFiatTransactions();
 
 /**
  * Store fiat transaction
  * @param {string} paymentIntentId - Stripe payment intent ID
  * @param {Object} txData - Transaction data
  */
-export function storeFiatTransaction(paymentIntentId, txData) {
-  fiatTransactions.set(paymentIntentId, {
-    ...txData,
-    createdAt: new Date().toISOString(),
-  });
-  saveToFile(FIAT_TRANSACTIONS_FILE, fiatTransactions);
+export async function storeFiatTransaction(paymentIntentId, txData) {
+  const { error } = await supabase
+    .from('fiat_transactions')
+    .upsert({
+      payment_intent_id: paymentIntentId,
+      module_id: txData.moduleId,
+      token_symbol: txData.tokenSymbol,
+      token_address: txData.tokenAddress,
+      recipient_address: txData.recipientAddress,
+      fiat_amount: txData.fiatAmount,
+      currency: txData.currency,
+      token_decimals: txData.tokenDecimals,
+      status: txData.status,
+      blockchain_tx_hash: txData.blockchainTxHash,
+      block_number: txData.blockNumber,
+      token_amount: txData.tokenAmount,
+      token_amount_wei: txData.tokenAmountWei,
+      updated_at: new Date().toISOString()
+    });
+
+  if (error) {
+    console.error(`Error storing fiat transaction ${paymentIntentId}:`, error);
+    throw error;
+  }
 }
 
 /**
@@ -214,8 +197,33 @@ export function storeFiatTransaction(paymentIntentId, txData) {
  * @param {string} paymentIntentId - Payment intent ID
  * @returns {Object|null} Transaction data or null
  */
-export function getFiatTransaction(paymentIntentId) {
-  return fiatTransactions.get(paymentIntentId) || null;
+export async function getFiatTransaction(paymentIntentId) {
+  const { data, error } = await supabase
+    .from('fiat_transactions')
+    .select('*')
+    .eq('payment_intent_id', paymentIntentId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    console.error(`Error getting fiat transaction ${paymentIntentId}:`, error);
+    throw error;
+  }
+
+  return {
+    ...data,
+    paymentIntentId: data.payment_intent_id,
+    moduleId: data.module_id,
+    tokenSymbol: data.token_symbol,
+    tokenAddress: data.token_address,
+    recipientAddress: data.recipient_address,
+    fiatAmount: data.fiat_amount,
+    tokenDecimals: data.token_decimals,
+    blockchainTxHash: data.blockchain_tx_hash,
+    blockNumber: data.block_number,
+    tokenAmount: data.token_amount,
+    tokenAmountWei: data.token_amount_wei
+  };
 }
 
 /**
@@ -223,18 +231,24 @@ export function getFiatTransaction(paymentIntentId) {
  * @param {string} paymentIntentId - Payment intent ID
  * @param {Object} updates - Updates to apply
  */
-export function updateFiatTransaction(paymentIntentId, updates) {
-  const existing = fiatTransactions.get(paymentIntentId);
-  if (!existing) {
-    throw new Error(`Fiat transaction not found: ${paymentIntentId}`);
-  }
+export async function updateFiatTransaction(paymentIntentId, updates) {
+  const dbUpdates = {};
+  if (updates.status) dbUpdates.status = updates.status;
+  if (updates.blockchainTxHash) dbUpdates.blockchain_tx_hash = updates.blockchainTxHash;
+  if (updates.blockNumber) dbUpdates.block_number = updates.blockNumber;
+  if (updates.tokenAmount) dbUpdates.token_amount = updates.tokenAmount;
+  if (updates.tokenAmountWei) dbUpdates.token_amount_wei = updates.tokenAmountWei;
+  dbUpdates.updated_at = new Date().toISOString();
 
-  fiatTransactions.set(paymentIntentId, {
-    ...existing,
-    ...updates,
-    updatedAt: new Date().toISOString(),
-  });
-  saveToFile(FIAT_TRANSACTIONS_FILE, fiatTransactions);
+  const { error } = await supabase
+    .from('fiat_transactions')
+    .update(dbUpdates)
+    .eq('payment_intent_id', paymentIntentId);
+
+  if (error) {
+    console.error(`Error updating fiat transaction ${paymentIntentId}:`, error);
+    throw error;
+  }
 }
 
 /**
@@ -242,9 +256,29 @@ export function updateFiatTransaction(paymentIntentId, updates) {
  * @param {string} moduleId - Module ID
  * @returns {Array} Array of fiat transactions
  */
-export function getFiatTransactionsByModule(moduleId) {
-  return Array.from(fiatTransactions.values()).filter(
-    (tx) => tx.moduleId === moduleId
-  );
-}
+export async function getFiatTransactionsByModule(moduleId) {
+  const { data, error } = await supabase
+    .from('fiat_transactions')
+    .select('*')
+    .eq('module_id', moduleId);
 
+  if (error) {
+    console.error(`Error getting fiat transactions for module ${moduleId}:`, error);
+    throw error;
+  }
+
+  return data.map(item => ({
+    ...item,
+    paymentIntentId: item.payment_intent_id,
+    moduleId: item.module_id,
+    tokenSymbol: item.token_symbol,
+    tokenAddress: item.token_address,
+    recipientAddress: item.recipient_address,
+    fiatAmount: item.fiat_amount,
+    tokenDecimals: item.token_decimals,
+    blockchainTxHash: item.blockchain_tx_hash,
+    blockNumber: item.block_number,
+    tokenAmount: item.token_amount,
+    tokenAmountWei: item.token_amount_wei
+  }));
+}

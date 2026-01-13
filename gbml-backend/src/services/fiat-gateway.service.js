@@ -27,7 +27,7 @@ export async function processFiatPaymentSuccess({
 }) {
     try {
         // Convert fiat to token amount
-        const tokenAmount = convertFiatToToken(fiatAmount, currency, moduleId);
+        const tokenAmount = await convertFiatToToken(fiatAmount, currency, moduleId);
 
         console.log(`[Fiat Gateway] Converting ${fiatAmount} ${currency} to ${tokenAmount} tokens`);
 
@@ -35,7 +35,7 @@ export async function processFiatPaymentSuccess({
         const receipt = await sendPayment(tokenAddress, recipientAddress, tokenAmount, tokenDecimals);
 
         // Update fiat transaction with blockchain tx hash
-        updateFiatTransaction(paymentIntentId, {
+        await updateFiatTransaction(paymentIntentId, {
             status: 'completed',
             blockchainTxHash: receipt.hash,
             blockNumber: receipt.blockNumber,
@@ -71,7 +71,7 @@ export async function processFiatPaymentSuccess({
 
         // Update fiat transaction with error
         try {
-            updateFiatTransaction(paymentIntentId, {
+            await updateFiatTransaction(paymentIntentId, {
                 status: 'failed',
                 error: error.message,
             });
@@ -108,7 +108,7 @@ export async function processFiatPaymentSuccess({
  * @param {string} params.paymentIntentId - Stripe payment intent ID
  * @param {number} params.tokenDecimals - Token decimals
  */
-export function initializeFiatPayment({
+export async function initializeFiatPayment({
     moduleId,
     tokenSymbol,
     tokenAddress,
@@ -119,7 +119,7 @@ export function initializeFiatPayment({
     tokenDecimals,
 }) {
     // Store fiat transaction in pending state
-    storeFiatTransaction(paymentIntentId, {
+    await storeFiatTransaction(paymentIntentId, {
         paymentIntentId,
         moduleId,
         tokenSymbol,
