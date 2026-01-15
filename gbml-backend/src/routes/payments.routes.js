@@ -22,7 +22,8 @@ router.get("/modules/payments", authenticate, listModules);
 router.post("/modules/payments/enable", authenticate, authorize(['admin']), enablePayments);
 
 // Send payment
-router.post("/payments/send", authenticate, sendPaymentController);
+// Send payment
+router.post("/payments/send", authenticate, authorize(['admin', 'TREASURY']), sendPaymentController);
 
 // Get token balance
 router.get("/payments/balance/:tokenAddress/:address", authenticate, getTokenBalance);

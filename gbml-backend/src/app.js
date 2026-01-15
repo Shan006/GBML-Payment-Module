@@ -3,11 +3,15 @@ import cors from "cors";
 import paymentsRoutes from "./routes/payments.routes.js";
 import fiatRoutes from "./routes/fiat.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import disbursementRoutes from "./routes/disbursement.routes.js";
+import apiKeyRoutes from "./routes/api-key.routes.js";
+import { authenticateApiKey } from "./middleware/api-key.js";
 
 const app = express();
 
 // Middleware
 app.use(cors());
+app.use(authenticateApiKey); // Global API Key authentication
 
 // Special parser for Stripe webhooks (need raw body)
 app.use(express.json({
@@ -28,6 +32,8 @@ app.get("/health", (req, res) => {
 app.use("/gbml", paymentsRoutes);
 app.use("/gbml", fiatRoutes);
 app.use("/gbml", adminRoutes);
+app.use("/gbml", disbursementRoutes);
+app.use("/gbml", apiKeyRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

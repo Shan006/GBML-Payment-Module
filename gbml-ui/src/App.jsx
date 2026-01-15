@@ -5,6 +5,8 @@ import SendPayment from './components/SendPayment'
 import FiatPayment from './components/FiatPayment'
 import Login from './components/Login'
 import EmergencyPauseButton from './components/EmergencyPauseButton'
+import ApiKeyManagement from './components/ApiKeyManagement'
+import DisbursementManagement from './components/DisbursementManagement'
 import { supabase } from './supabase'
 import axios from 'axios'
 import './App.css'
@@ -140,7 +142,28 @@ function App() {
           >
             Fiat Gateway (USD/EUR/AUD/CAD/GBP)
           </button>
+
+          {(role === 'admin' || role === 'TREASURY' || role === 'COMPLIANCE') && (
+            <button
+              className={`tab-button ${activeTab === 'admin' ? 'active' : ''}`}
+              onClick={() => setActiveTab('admin')}
+              style={{
+                padding: '1rem 2rem',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: 'pointer',
+                background: activeTab === 'admin' ? 'white' : 'rgba(255,255,255,0.2)',
+                color: activeTab === 'admin' ? '#764ba2' : 'white',
+                fontWeight: 600,
+                fontSize: '1.1rem',
+                transition: 'all 0.3s'
+              }}
+            >
+              Admin & RBAC
+            </button>
+          )}
         </div>
+
 
         {activeTab === 'standard' ? (
           <>
@@ -172,9 +195,14 @@ function App() {
               </div>
             )}
           </>
-        ) : (
+        ) : activeTab === 'fiat' ? (
           <div className="payment-section">
             <FiatPayment />
+          </div>
+        ) : (
+          <div className="admin-section" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <ApiKeyManagement />
+            <DisbursementManagement role={role} />
           </div>
         )}
       </main>

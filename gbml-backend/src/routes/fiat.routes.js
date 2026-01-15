@@ -16,7 +16,8 @@ const router = express.Router();
  */
 
 // Create fiat payment intent
-router.post('/fiat/payment/create', authenticate, createFiatPaymentIntent);
+// Create fiat payment intent
+router.post('/fiat/payment/create', authenticate, authorize(['admin', 'TREASURY', 'PROGRAM']), createFiatPaymentIntent);
 
 // Stripe webhook handler - PUBLIC (handled by Stripe)
 router.post('/fiat/webhook', handleStripeWebhook);
@@ -29,6 +30,6 @@ router.get('/tokens', authenticate, listAvailableTokens);
 
 // Module-specific exchange rates
 router.get('/modules/payments/:moduleId/rates', authenticate, getExchangeRates);
-router.put('/modules/payments/:moduleId/rates', authenticate, authorize(['admin']), updateExchangeRates);
+router.put('/modules/payments/:moduleId/rates', authenticate, authorize(['admin', 'TREASURY', 'COMPLIANCE']), updateExchangeRates);
 
 export default router;
