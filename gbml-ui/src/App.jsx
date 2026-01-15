@@ -138,7 +138,7 @@ function App() {
               transition: 'all 0.3s'
             }}
           >
-            Fiat Gateway (USD/EUR)
+            Fiat Gateway (USD/EUR/AUD/CAD/GBP)
           </button>
         </div>
 
