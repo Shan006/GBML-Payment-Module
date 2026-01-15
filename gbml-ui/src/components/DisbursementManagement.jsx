@@ -6,6 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 const DisbursementManagement = ({ role }) => {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [executingId, setExecutingId] = useState(null);
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -26,7 +27,7 @@ const DisbursementManagement = ({ role }) => {
     };
 
     const handleExecute = async (requestId) => {
-        setLoading(true);
+        setExecutingId(requestId);
         setError(null);
         try {
             await axios.post(`${API_BASE_URL}/treasury/disbursements/${requestId}/execute`);
@@ -35,7 +36,7 @@ const DisbursementManagement = ({ role }) => {
         } catch (err) {
             setError(err.response?.data?.error || 'Execution failed');
         } finally {
-            setLoading(false);
+            setExecutingId(null);
         }
     };
 
@@ -69,18 +70,18 @@ const DisbursementManagement = ({ role }) => {
                                     <td>{req.reason || '-'}</td>
                                     <td>{new Date(req.created_at).toLocaleString()}</td>
                                     <td>
-                                        {(req.status === 'PENDING' || req.status === 'APPROVED') && (role === 'admin' || role === 'TREASURY') && (
+                                        {(req.status === 'PENDING' || req.status === 'PROCESSING' || req.status === 'APPROVED') && (role === 'admin' || role === 'TREASURY') && (
                                             <button
                                                 onClick={() => handleExecute(req.id)}
-                                                disabled={loading}
-                                                className="btn-execute"
+                                                disabled={loading || executingId === req.id || req.status === 'PROCESSING'}
+                                                className={`btn-execute ${req.status === 'PROCESSING' ? 'btn-processing' : ''}`}
                                             >
-                                                {loading ? 'Executing...' : 'Execute'}
+                                                {executingId === req.id || req.status === 'PROCESSING' ? 'Processing...' : 'Execute'}
                                             </button>
                                         )}
                                         {req.blockchain_tx_hash && (
                                             <a
-                                                href={`https://explorer.example.com/tx/${req.blockchain_tx_hash}`}
+                                                href={`https://explorer.jvdegcr.com/tx/${req.blockchain_tx_hash}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="tx-link"

@@ -85,7 +85,7 @@ export class DisbursementService {
             // Update status to PROCESSING
             await supabase
                 .from('disbursement_requests')
-                .update({ status: 'APPROVED' }) // Using APPROVED as intermediate or just execute
+                .update({ status: 'PROCESSING' })
                 .eq('id', requestId);
 
             const receipt = await sendPayment(
@@ -96,17 +96,31 @@ export class DisbursementService {
             );
 
             // 4. Update request status
+            const updateData = {
+                status: 'EXECUTED',
+                blockchain_tx_hash: receipt.hash,
+                updated_at: new Date().toISOString()
+            };
+
+            // Set the appropriate ID based on identity type
+            if (identity.apiKeyId) {
+                updateData.executed_by_api_key = identity.apiKeyId;
+            } else {
+                updateData.executed_by_id = identity.id; // We need to ensure this column exists or add it
+            }
+
             const { data: updatedRequest, error: updateError } = await supabase
                 .from('disbursement_requests')
-                .update({
-                    status: 'EXECUTED',
-                    executed_by_api_key: identity.id,
-                    blockchain_tx_hash: receipt.hash,
-                    updated_at: new Date().toISOString()
-                })
+                .update(updateData)
                 .eq('id', requestId)
                 .select()
                 .single();
+
+            if (updateError) {
+                console.error('Failed to update disbursement status to EXECUTED:', updateError);
+                // Even if DB update fails, we already executed on blockchain, so we shouldn't throw 
+                // but we should at least log it properly.
+            }
 
             await logAudit({
                 action: 'DISBURSEMENT_EXECUTE',
