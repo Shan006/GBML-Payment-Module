@@ -87,7 +87,16 @@ const ApiKeyManagement = () => {
                 <div className="form-group">
                     <label>Roles:</label>
                     <div className="roles-checkboxes">
-                        {['PROGRAM', 'TREASURY', 'COMPLIANCE'].map(role => (
+                        {/* {['PROGRAM', 'TREASURY', 'COMPLIANCE'].map(role => (
+                            <label key={role} className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={newKeyData.roles.includes(role)}
+                                    onChange={() => handleRoleChange(role)}
+                                /> {role}
+                            </label>
+                        ))} */}
+                        {['PROGRAM'].map(role => (
                             <label key={role} className="checkbox-label">
                                 <input
                                     type="checkbox"
