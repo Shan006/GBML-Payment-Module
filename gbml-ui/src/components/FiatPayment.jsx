@@ -76,7 +76,7 @@ const FiatPayment = () => {
     const [successData, setSuccessData] = useState(null);
     const [backendStatus, setBackendStatus] = useState(null);
 
-    const API_BASE_URL = 'http://localhost:3000/gbml';
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/gbml'
 
     useEffect(() => {
         fetchTokens();
@@ -233,6 +233,9 @@ const FiatPayment = () => {
                             >
                                 <option value="USD">USD ($)</option>
                                 <option value="EUR">EUR (€)</option>
+                                <option value="AUD">AUD ($)</option>
+                                <option value="CAD">CAD ($)</option>
+                                <option value="GBP">GBP (£)</option>
                             </select>
                         </div>
                         <div className="form-group" style={{ flex: 2 }}>

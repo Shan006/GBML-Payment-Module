@@ -16,6 +16,24 @@ export const SUPPORTED_CURRENCIES = {
     code: 'EUR',
     decimals: 2,
   },
+  AUD: {
+    symbol: '$',
+    name: 'Australian Dollar',
+    code: 'AUD',
+    decimals: 2,
+  },
+  CAD: {
+    symbol: '$',
+    name: 'Canadian Dollar',
+    code: 'CAD',
+    decimals: 2,
+  },
+  GBP: {
+    symbol: '£',
+    name: 'British Pound',
+    code: 'GBP',
+    decimals: 2,
+  },
 };
 
 /**
@@ -25,7 +43,10 @@ export const SUPPORTED_CURRENCIES = {
  */
 export const DEFAULT_EXCHANGE_RATES = {
   USD: 1, // 1 USD = 1 token
-  EUR: 1, // 1 EUR = 1 token
+  EUR: 0.86, // 1 EUR = 1 token
+  AUD: 1.5, // 1 AUD = 1 token
+  CAD: 1.39, // 1 CAD = 1 token
+  GBP: 0.74, // 1 GBP = 1 token
 };
 
 /**
