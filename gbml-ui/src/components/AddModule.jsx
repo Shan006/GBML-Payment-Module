@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import axios from 'axios'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/gbml'
-const TENANT_ID = 'tenant-001' // In production, this would come from auth context
+import { API_BASE_URL, TENANT_ID } from '../config'
 
 export default function AddModule({ onModuleAdded }) {
   const [showForm, setShowForm] = useState(false)
