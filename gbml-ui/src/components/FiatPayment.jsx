@@ -7,6 +7,7 @@ import {
     useElements,
 } from '@stripe/react-stripe-js';
 import axios from 'axios';
+import { API_BASE_URL } from '../config'
 
 // Initialize Stripe (use a placeholder key if not provided in env)
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
@@ -75,8 +76,6 @@ const FiatPayment = () => {
     const [error, setError] = useState(null);
     const [successData, setSuccessData] = useState(null);
     const [backendStatus, setBackendStatus] = useState(null);
-
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/gbml'
 
     useEffect(() => {
         fetchTokens();

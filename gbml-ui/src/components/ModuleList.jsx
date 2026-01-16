@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import EmergencyPauseButton from './EmergencyPauseButton'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/gbml'
-const TENANT_ID = 'tenant-001' // In production, this would come from auth context
+import { API_BASE_URL, TENANT_ID } from '../config'
 
 export default function ModuleList({ onSelectModule, selectedModuleId, refreshTrigger, role }) {
   const [modules, setModules] = useState([])

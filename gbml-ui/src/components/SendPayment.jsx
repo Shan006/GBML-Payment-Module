@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/gbml'
+import { API_BASE_URL } from '../config'
 
 export default function SendPayment({ module }) {
   const [to, setTo] = useState('')

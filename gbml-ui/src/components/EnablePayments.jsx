@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/gbml'
+import { API_BASE_URL, TENANT_ID } from '../config'
 
 export default function EnablePayments({ onEnabled }) {
   const [loading, setLoading] = useState(false)
@@ -16,7 +16,7 @@ export default function EnablePayments({ onEnabled }) {
 
     try {
       const response = await axios.post(`${API_BASE_URL}/modules/payments/enable`, {
-        tenantId: 'tenant-001',
+        tenantId: TENANT_ID,
         token: {
           mode: 'DEPLOY',
           name: 'Acme USD',
