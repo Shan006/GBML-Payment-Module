@@ -12,6 +12,12 @@ const JRC20Path = join(__dirname, "../blockchain/contracts/JRC20.json");
 const JRC20 = JSON.parse(readFileSync(JRC20Path, "utf-8"));
 
 /**
+ * Exported JRC20 artifact (abi + bytecode) for use by other services
+ * e.g. Contract Registry Service uses this to persist the ABI on deployment
+ */
+export { JRC20 };
+
+/**
  * Deploy a new JRC-20 token contract
  * @param {Object} config - Token configuration
  * @param {Object} config.token - Token parameters

@@ -1,10 +1,14 @@
-import { deployJRC20, attachJRC20 } from "../services/token.service.js";
+import { deployJRC20, attachJRC20, JRC20 } from "../services/token.service.js";
 import { sendPayment, getBalance } from "../services/router.service.js";
 import { logModuleEnable, logPaymentTransaction, logError } from "../services/audit.service.js";
 import { isValidAddress } from "../services/wallet.service.js";
 import { storeModule, getModule, getModulesByTenant } from "../db/index.js";
 import { treasurySigner } from "../blockchain/signer.js";
 import { v4 as uuid } from "uuid";
+import { ContractsService } from "../contracts/contracts.service.js";
+
+const contractsService = new ContractsService();
+
 
 /**
  * Enable payments module
@@ -35,6 +39,21 @@ export async function enablePayments(req, res) {
       }
 
       tokenAddress = await deployJRC20(config);
+
+      // Auto-register the deployed contract in the Smart Contract Registry
+      try {
+        await contractsService.createContract({
+          serviceId: config.token.symbol.toLowerCase(),
+          contractName: config.token.name,
+          contractType: 'TOKEN',
+          contractAddress: tokenAddress,
+          abi: JRC20.abi
+        });
+        console.log(`[ContractRegistry] Registered contract for token: ${config.token.symbol} at ${tokenAddress}`);
+      } catch (registryErr) {
+        // Registry failure is non-fatal — log it and continue
+        console.error('[ContractRegistry] Warning: failed to auto-register contract in registry:', registryErr.message);
+      }
     } else if (config.token.mode === "ATTACH") {
       const token = attachJRC20(config.token.address);
       tokenAddress = token.target;

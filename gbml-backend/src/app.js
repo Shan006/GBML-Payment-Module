@@ -5,7 +5,11 @@ import fiatRoutes from "./routes/fiat.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import disbursementRoutes from "./routes/disbursement.routes.js";
 import apiKeyRoutes from "./routes/api-key.routes.js";
+import contractsRoutes from "./contracts/contracts.routes.js";
+import deploymentRoutes from "./deployment/deployment.routes.js";
 import { authenticateApiKey } from "./middleware/api-key.js";
+
+
 
 const app = express();
 
@@ -34,6 +38,18 @@ app.use("/gbml", fiatRoutes);
 app.use("/gbml", adminRoutes);
 app.use("/gbml", disbursementRoutes);
 app.use("/gbml", apiKeyRoutes);
+
+// Contract Registry routes
+// Available as /contracts/* (per spec) and /gbml/contracts/* (for consistency)
+app.use("/contracts", contractsRoutes);
+app.use("/gbml/contracts", contractsRoutes);
+
+// Dynamic Contract Deployment Engine routes
+// Available as /deploy (per spec) and /gbml/deploy (for consistency)
+app.use("/deploy", deploymentRoutes);
+app.use("/gbml/deploy", deploymentRoutes);
+
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {

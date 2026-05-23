@@ -7,6 +7,7 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || "development",
   juvidoeRpcUrl: process.env.JUVIDOE_RPC_URL,
   treasuryPrivateKey: process.env.TREASURY_PRIVATE_KEY,
+  deployerPrivateKey: process.env.DEPLOYER_PRIVATE_KEY || process.env.TREASURY_PRIVATE_KEY,
 };
 
 // Validate required environment variables
@@ -17,4 +18,9 @@ if (!config.juvidoeRpcUrl) {
 if (!config.treasuryPrivateKey) {
   throw new Error("TREASURY_PRIVATE_KEY is required");
 }
+
+if (!config.deployerPrivateKey) {
+  throw new Error("DEPLOYER_PRIVATE_KEY or TREASURY_PRIVATE_KEY is required");
+}
+
 
