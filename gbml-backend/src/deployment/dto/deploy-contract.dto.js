@@ -15,10 +15,11 @@ export class DeployContractDto {
   static validate(data) {
     const errors = [];
 
-    const validTypes = ['TOKEN', 'NFT', 'TREASURY', 'ROUTER'];
+    const validTypes = ['TOKEN', 'NFT', 'TREASURY', 'ROUTER', 'JVD_ROUTER'];
     if (!data.contractType || !validTypes.includes(data.contractType.toUpperCase())) {
       errors.push(`contractType is required and must be one of: ${validTypes.join(', ')}`);
     }
+
 
     if (data.constructorParams === undefined || data.constructorParams === null) {
       errors.push('constructorParams is required');

@@ -26,10 +26,11 @@ export class CreateContractDto {
       errors.push('contractName is required and must be a non-empty string');
     }
 
-    const validTypes = ['TOKEN', 'NFT', 'TREASURY', 'ROUTER', 'CUSTOM'];
+    const validTypes = ['TOKEN', 'NFT', 'TREASURY', 'ROUTER', 'CUSTOM', 'JVD_ROUTER'];
     if (!data.contractType || !validTypes.includes(data.contractType.toUpperCase())) {
       errors.push(`contractType is required and must be one of: ${validTypes.join(', ')}`);
     }
+
 
     if (!data.contractAddress || typeof data.contractAddress !== 'string') {
       errors.push('contractAddress is required and must be a string');

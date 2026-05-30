@@ -144,6 +144,43 @@
       "artifacts": [
         "Treasury"
       ]
+    },
+    "D:\\Shayan\\Projects\\FREELANCE\\Juvidoe Projects\\Payment GB\\gbml-backend\\contracts\\JvdRouter.sol": {
+      "lastModificationDate": 1780118743440,
+      "contentHash": "42efeaa0920c19c6e4cf0cc3ce34d84a",
+      "sourceName": "contracts/JvdRouter.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC20",
+        "JvdRouter"
+      ]
     }
   }
 }

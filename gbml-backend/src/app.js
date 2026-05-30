@@ -8,7 +8,9 @@ import apiKeyRoutes from "./routes/api-key.routes.js";
 import contractsRoutes from "./contracts/contracts.routes.js";
 import deploymentRoutes from "./deployment/deployment.routes.js";
 import enablementRoutes from "./enablement/enablement.routes.js";
+import settlementsRoutes from "./settlements/settlements.routes.js";
 import { authenticateApiKey } from "./middleware/api-key.js";
+
 
 
 
@@ -55,6 +57,12 @@ app.use("/gbml/deploy", deploymentRoutes);
 // Available as /enable-blockchain (per spec) and /gbml/enable-blockchain (for consistency)
 app.use("/enable-blockchain", enablementRoutes);
 app.use("/gbml/enable-blockchain", enablementRoutes);
+
+// JVD Router / Settlement Layer routes
+// Available as /settlements (per spec) and /gbml/settlements (for consistency)
+app.use("/settlements", settlementsRoutes);
+app.use("/gbml/settlements", settlementsRoutes);
+
 
 
 

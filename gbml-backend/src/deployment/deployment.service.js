@@ -6,8 +6,10 @@ const CONTRACTS = {
   TOKEN: 'JRC20',
   NFT: 'JRC721',
   TREASURY: 'Treasury',
-  ROUTER: 'Router'
+  ROUTER: 'Router',
+  JVD_ROUTER: 'JvdRouter'
 };
+
 
 export class DeploymentService {
   constructor() {
