@@ -7,7 +7,9 @@ import disbursementRoutes from "./routes/disbursement.routes.js";
 import apiKeyRoutes from "./routes/api-key.routes.js";
 import contractsRoutes from "./contracts/contracts.routes.js";
 import deploymentRoutes from "./deployment/deployment.routes.js";
+import enablementRoutes from "./enablement/enablement.routes.js";
 import { authenticateApiKey } from "./middleware/api-key.js";
+
 
 
 
@@ -48,6 +50,12 @@ app.use("/gbml/contracts", contractsRoutes);
 // Available as /deploy (per spec) and /gbml/deploy (for consistency)
 app.use("/deploy", deploymentRoutes);
 app.use("/gbml/deploy", deploymentRoutes);
+
+// Blockchain Enablement Service routes
+// Available as /enable-blockchain (per spec) and /gbml/enable-blockchain (for consistency)
+app.use("/enable-blockchain", enablementRoutes);
+app.use("/gbml/enable-blockchain", enablementRoutes);
+
 
 
 
