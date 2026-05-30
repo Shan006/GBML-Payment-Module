@@ -7,6 +7,7 @@ import Login from './components/Login'
 import EmergencyPauseButton from './components/EmergencyPauseButton'
 import ApiKeyManagement from './components/ApiKeyManagement'
 import DisbursementManagement from './components/DisbursementManagement'
+import WalletDashboard from './components/WalletDashboard'
 import { supabase } from './supabase'
 import axios from 'axios'
 import './App.css'
@@ -142,6 +143,23 @@ function App() {
           >
             Fiat Gateway (USD/EUR/AUD/CAD/GBP)
           </button>
+          <button
+            className={`tab-button ${activeTab === 'wallet' ? 'active' : ''}`}
+            onClick={() => setActiveTab('wallet')}
+            style={{
+              padding: '1rem 2rem',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              background: activeTab === 'wallet' ? 'white' : 'rgba(255,255,255,0.2)',
+              color: activeTab === 'wallet' ? '#764ba2' : 'white',
+              fontWeight: 600,
+              fontSize: '1.1rem',
+              transition: 'all 0.3s'
+            }}
+          >
+            💳 Wallet
+          </button>
 
           {(role === 'admin' || role === 'TREASURY' || role === 'COMPLIANCE') && (
             <button
@@ -199,6 +217,8 @@ function App() {
           <div className="payment-section">
             <FiatPayment />
           </div>
+        ) : activeTab === 'wallet' ? (
+          <WalletDashboard session={session} />
         ) : (
           <div className="admin-section" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <ApiKeyManagement />

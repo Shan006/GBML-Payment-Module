@@ -9,6 +9,7 @@ import contractsRoutes from "./contracts/contracts.routes.js";
 import deploymentRoutes from "./deployment/deployment.routes.js";
 import enablementRoutes from "./enablement/enablement.routes.js";
 import settlementsRoutes from "./settlements/settlements.routes.js";
+import walletsRoutes from "./wallets/wallets.routes.js";
 import { authenticateApiKey } from "./middleware/api-key.js";
 
 
@@ -63,6 +64,10 @@ app.use("/gbml/enable-blockchain", enablementRoutes);
 app.use("/settlements", settlementsRoutes);
 app.use("/gbml/settlements", settlementsRoutes);
 
+// Wallet Module routes
+// Available as /wallets (per spec) and /gbml/wallets (for consistency)
+app.use("/wallets", walletsRoutes);
+app.use("/gbml/wallets", walletsRoutes);
 
 
 
