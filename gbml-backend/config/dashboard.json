@@ -1,0 +1,22 @@
+{
+  "modules": [
+    {
+      "moduleId": "treasury-main",
+      "contractType": "TOKEN",
+      "contractAddress": "0x1CBB36A44640908F9b578150DB2b7Ee53246E8F6",
+      "enabled": true,
+      "walletAddress": "0x7036ddc58710b4586db965b5933a7222e48fccb1",
+      "jvdRouterAddress": "0xbf3902ea819ecd136e407d29cf9c6bf1f08ae512",
+      "updatedAt": "2026-05-30T09:51:59.218Z"
+    },
+    {
+      "moduleId": "Testing 1234",
+      "contractType": "TREASURY",
+      "contractAddress": "0xfada1e508369a804a2e066fdef77ab456d08bede",
+      "enabled": false,
+      "walletAddress": "0x384de3a8f030dd6f87b4fd98ab8ae00b575cf11c",
+      "jvdRouterAddress": null,
+      "updatedAt": "2026-05-30T10:08:39.233Z"
+    }
+  ]
+}

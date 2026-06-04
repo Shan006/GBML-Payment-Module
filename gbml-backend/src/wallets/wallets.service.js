@@ -13,6 +13,50 @@ export class WalletService {
   }
 
   /**
+   * GBML module wallet user id namespace
+   */
+  static moduleUserId(moduleId) {
+    return `module:${moduleId}`;
+  }
+
+  /**
+   * Create or return existing wallet bound to a GBML module (for enable-blockchain flow)
+   * @param {string} moduleId - Module identifier
+   * @returns {Promise<Object>} { walletAddress, created }
+   */
+  async createOrGetModuleWallet(moduleId) {
+    const userId = WalletService.moduleUserId(moduleId);
+    const existing = await this.walletRepository.findWalletByUserId(userId);
+    if (existing) {
+      return { walletAddress: existing.walletAddress, created: false };
+    }
+
+    const randomWallet = ethers.Wallet.createRandom();
+    const walletData = {
+      id: uuid(),
+      userId,
+      walletAddress: randomWallet.address,
+      privateKey: randomWallet.privateKey
+    };
+
+    const saved = await this.walletRepository.saveWallet(walletData);
+    return {
+      walletAddress: saved.walletAddress,
+      created: true
+    };
+  }
+
+  /**
+   * Resolve module-bound wallet address if present
+   */
+  async getModuleWalletAddress(moduleId) {
+    const wallet = await this.walletRepository.findWalletByUserId(
+      WalletService.moduleUserId(moduleId)
+    );
+    return wallet?.walletAddress || null;
+  }
+
+  /**
    * Create a random wallet for a user and store its address in the DB
    * @param {string} userId - User identifier
    * @returns {Promise<Object>} Object containing address and private key

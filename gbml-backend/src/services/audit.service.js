@@ -62,6 +62,30 @@ export async function logModuleEnable(data, identity = {}) {
 }
 
 /**
+ * Log blockchain enablement (GBML orchestrator)
+ */
+export async function logBlockchainEnable(data, identity = {}) {
+  await logAudit({
+    action: 'BLOCKCHAIN_ENABLE',
+    resource: 'BLOCKCHAIN_MODULE',
+    payload: data,
+    tenantId: data.tenantId
+  }, identity);
+}
+
+/**
+ * Log module KYC binding for blockchain interactions
+ */
+export async function logModuleKycBind(data, identity = {}) {
+  await logAudit({
+    action: 'KYC_BIND',
+    resource: 'BLOCKCHAIN_MODULE',
+    payload: data,
+    tenantId: data.tenantId
+  }, identity);
+}
+
+/**
  * Log error event
  */
 export async function logError(data, identity = {}) {

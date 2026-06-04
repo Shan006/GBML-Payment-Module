@@ -12,10 +12,16 @@ export class EnablementRepository {
       .from('blockchain_modules')
       .insert({
         id: moduleData.id,
+        module_id: moduleData.moduleId || moduleData.serviceId,
         service_id: moduleData.serviceId,
         module_type: moduleData.moduleType.toUpperCase(),
         contract_address: moduleData.contractAddress.toLowerCase(),
-        blockchain_enabled: moduleData.blockchainEnabled,
+        blockchain_enabled: moduleData.blockchainEnabled !== undefined ? moduleData.blockchainEnabled : true,
+        status: moduleData.status || 'ACTIVE',
+        wallet_enabled: moduleData.walletEnabled || false,
+        settlement_enabled: moduleData.settlementEnabled || false,
+        conversion_enabled: moduleData.conversionEnabled || false,
+        deployment_tx_hash: moduleData.deploymentTxHash,
         created_at: new Date().toISOString()
       })
       .select()
@@ -26,7 +32,7 @@ export class EnablementRepository {
       throw error;
     }
 
-    return BlockchainModule.fromDatabase(data);
+    return new BlockchainModule(data);
   }
 
   /**
@@ -47,7 +53,7 @@ export class EnablementRepository {
       throw error;
     }
 
-    return BlockchainModule.fromDatabase(data);
+    return data ? new BlockchainModule(data) : null;
   }
 
   /**
@@ -69,6 +75,108 @@ export class EnablementRepository {
       throw error;
     }
 
-    return (data || []).map(row => BlockchainModule.fromDatabase(row));
+    return (data || []).map(row => new BlockchainModule(row));
+  }
+
+  /**
+   * Find blockchain module by module ID
+   */
+  async findByModuleId(moduleId) {
+    const { data, error } = await supabase
+      .from('blockchain_modules')
+      .select('*')
+      .eq('module_id', moduleId)
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') return null
+      throw error
+    }
+
+    return data ? new BlockchainModule(data) : null
+  }
+
+  /**
+   * Get all blockchain modules
+   */
+  async findAll(filters = {}) {
+    let query = supabase
+      .from('blockchain_modules')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (filters.moduleType) {
+      query = query.eq('module_type', filters.moduleType.toUpperCase())
+    }
+
+    if (filters.status) {
+      query = query.eq('status', filters.status)
+    }
+
+    if (filters.blockchainEnabled !== undefined) {
+      query = query.eq('blockchain_enabled', filters.blockchainEnabled)
+    }
+
+    const { data, error } = await query
+
+    if (error) throw error
+    return data.map(item => new BlockchainModule(item))
+  }
+
+  /**
+   * Update blockchain module
+   */
+  async update(moduleId, updateData) {
+    const updates = {
+      updated_at: new Date().toISOString()
+    }
+
+    if (updateData.status !== undefined) updates.status = updateData.status
+    if (updateData.blockchainEnabled !== undefined) updates.blockchain_enabled = updateData.blockchainEnabled
+    if (updateData.walletEnabled !== undefined) updates.wallet_enabled = updateData.walletEnabled
+    if (updateData.settlementEnabled !== undefined) updates.settlement_enabled = updateData.settlementEnabled
+    if (updateData.conversionEnabled !== undefined) updates.conversion_enabled = updateData.conversionEnabled
+
+    const { data, error } = await supabase
+      .from('blockchain_modules')
+      .update(updates)
+      .eq('module_id', moduleId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return new BlockchainModule(data)
+  }
+
+  /**
+   * Get statistics
+   */
+  async getStats() {
+    const { data, error } = await supabase
+      .from('blockchain_modules')
+      .select('module_type, status, blockchain_enabled')
+
+    if (error) throw error
+
+    const stats = {
+      total: data.length,
+      enabled: 0,
+      disabled: 0,
+      byType: {},
+      byStatus: {}
+    }
+
+    data.forEach(module => {
+      if (module.blockchain_enabled) {
+        stats.enabled++
+      } else {
+        stats.disabled++
+      }
+
+      stats.byType[module.module_type] = (stats.byType[module.module_type] || 0) + 1
+      stats.byStatus[module.status] = (stats.byStatus[module.status] || 0) + 1
+    })
+
+    return stats
   }
 }

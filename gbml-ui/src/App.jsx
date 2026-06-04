@@ -8,6 +8,7 @@ import EmergencyPauseButton from './components/EmergencyPauseButton'
 import ApiKeyManagement from './components/ApiKeyManagement'
 import DisbursementManagement from './components/DisbursementManagement'
 import WalletDashboard from './components/WalletDashboard'
+import BlockchainModules from './components/BlockchainModules'
 import { supabase } from './supabase'
 import axios from 'axios'
 import './App.css'
@@ -161,6 +162,24 @@ function App() {
             💳 Wallet
           </button>
 
+          <button
+            className={`tab-button ${activeTab === 'blockchain' ? 'active' : ''}`}
+            onClick={() => setActiveTab('blockchain')}
+            style={{
+              padding: '1rem 2rem',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              background: activeTab === 'blockchain' ? 'white' : 'rgba(255,255,255,0.2)',
+              color: activeTab === 'blockchain' ? '#764ba2' : 'white',
+              fontWeight: 600,
+              fontSize: '1.1rem',
+              transition: 'all 0.3s'
+            }}
+          >
+            🔗 Blockchain
+          </button>
+
           {(role === 'admin' || role === 'TREASURY' || role === 'COMPLIANCE') && (
             <button
               className={`tab-button ${activeTab === 'admin' ? 'active' : ''}`}
@@ -219,6 +238,8 @@ function App() {
           </div>
         ) : activeTab === 'wallet' ? (
           <WalletDashboard session={session} />
+        ) : activeTab === 'blockchain' ? (
+          <BlockchainModules role={role} />
         ) : (
           <div className="admin-section" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <ApiKeyManagement />

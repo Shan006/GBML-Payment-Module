@@ -59,6 +59,11 @@ app.use("/gbml/deploy", deploymentRoutes);
 app.use("/enable-blockchain", enablementRoutes);
 app.use("/gbml/enable-blockchain", enablementRoutes);
 
+// Blockchain Modules Management routes
+// Available as /blockchain-modules and /gbml/blockchain-modules
+app.use("/blockchain-modules", enablementRoutes);
+app.use("/gbml/blockchain-modules", enablementRoutes);
+
 // JVD Router / Settlement Layer routes
 // Available as /settlements (per spec) and /gbml/settlements (for consistency)
 app.use("/settlements", settlementsRoutes);
