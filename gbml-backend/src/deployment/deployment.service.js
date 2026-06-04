@@ -3,11 +3,11 @@ import { ContractsService } from '../contracts/contracts.service.js';
 import { CreateContractDto } from '../contracts/dto/create-contract.dto.js';
 
 const CONTRACTS = {
-  TOKEN: 'JRC20',
-  NFT: 'JRC721',
+  TOKEN: 'JRC20WithJvdRouter',
+  NFT: 'JRC721WithJvdRouter',
   TREASURY: 'Treasury',
   ROUTER: 'Router',
-  JVD_ROUTER: 'JvdRouter'
+  JVD_ROUTER: 'JvdEgcrRouter'
 };
 
 

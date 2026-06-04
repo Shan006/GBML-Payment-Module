@@ -5,11 +5,11 @@ import path from 'path';
 import fs from 'fs';
 
 const CONTRACTS = {
-  TOKEN: 'JRC20',
-  NFT: 'JRC721',
+  TOKEN: 'JRC20WithJvdRouter',
+  NFT: 'JRC721WithJvdRouter',
   TREASURY: 'Treasury',
   ROUTER: 'Router',
-  JVD_ROUTER: 'JvdRouter'
+  JVD_ROUTER: 'JvdEgcrRouter'
 };
 
 

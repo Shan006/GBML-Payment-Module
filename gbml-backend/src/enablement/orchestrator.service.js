@@ -192,9 +192,12 @@ export class OrchestratorService {
 
   async deployContract({ contractType, moduleId, moduleType, walletAddress, constructorParams }) {
     try {
+      // Get JVD Router address for router-enforced contracts
+      const jvdRouterAddress = await this.getJvdRouterAddress();
+
       const deploymentParams = constructorParams?.length
         ? { constructorParams }
-        : this.prepareDeploymentParams(contractType, moduleId, walletAddress);
+        : this.prepareDeploymentParams(contractType, moduleId, walletAddress, jvdRouterAddress);
 
       const result = await this.deploymentService.deploy({
         contractType,
@@ -214,9 +217,10 @@ export class OrchestratorService {
   }
 
   /**
-   * Constructor args aligned with compiled Juvidoe templates (JRC20, JRC721, Treasury, Router)
+   * Constructor args aligned with compiled Juvidoe templates (JRC20WithJvdRouter, JRC721WithJvdRouter, Treasury, Router)
+   * Router address is injected for all router-enforced contracts
    */
-  prepareDeploymentParams(contractType, moduleId, walletAddress) {
+  prepareDeploymentParams(contractType, moduleId, walletAddress, jvdRouterAddress) {
     const safeId = moduleId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8).toUpperCase() || 'MOD';
     const type = contractType.toUpperCase();
 
@@ -229,7 +233,8 @@ export class OrchestratorService {
             `MTK${safeId}`,
             18,
             ethers.parseEther('1000000'),
-            walletAddress
+            walletAddress,
+            jvdRouterAddress // Router address injected for JRC20WithJvdRouter
           ]
         };
       case 'TREASURY':
@@ -239,7 +244,7 @@ export class OrchestratorService {
       case 'JRC721':
       case 'NFT':
         return {
-          constructorParams: [`Module NFT ${moduleId}`, `NFT${safeId}`]
+          constructorParams: [`Module NFT ${moduleId}`, `NFT${safeId}`, jvdRouterAddress] // Router address injected for JRC721WithJvdRouter
         };
       case 'ROUTER':
         return {

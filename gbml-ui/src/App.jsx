@@ -144,7 +144,7 @@ function App() {
           >
             Fiat Gateway (USD/EUR/AUD/CAD/GBP)
           </button>
-          <button
+          {/* <button
             className={`tab-button ${activeTab === 'wallet' ? 'active' : ''}`}
             onClick={() => setActiveTab('wallet')}
             style={{
@@ -160,7 +160,7 @@ function App() {
             }}
           >
             💳 Wallet
-          </button>
+          </button> */}
 
           <button
             className={`tab-button ${activeTab === 'blockchain' ? 'active' : ''}`}

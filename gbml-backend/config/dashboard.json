@@ -17,6 +17,24 @@
       "walletAddress": "0x384de3a8f030dd6f87b4fd98ab8ae00b575cf11c",
       "jvdRouterAddress": null,
       "updatedAt": "2026-05-30T10:08:39.233Z"
+    },
+    {
+      "moduleId": "fund-001",
+      "contractType": "NFT",
+      "contractAddress": "0x9483349B607338C63c1397bA68C0aE79d7F58B8A",
+      "enabled": true,
+      "walletAddress": "0x943760590f8be21a9d31fca8495a1738b9921791",
+      "jvdRouterAddress": "0xbf3902ea819ecd136e407d29cf9c6bf1f08ae512",
+      "updatedAt": "2026-06-04T17:38:15.150Z"
+    },
+    {
+      "moduleId": "NFT-COL",
+      "contractType": "NFT",
+      "contractAddress": "0xCccbD0546223bf9bfecB383D422dAe1156066Cd1",
+      "enabled": true,
+      "walletAddress": "0x1712b5df9e7cfd79005292c063094288394ab977",
+      "jvdRouterAddress": "0xbf3902ea819ecd136e407d29cf9c6bf1f08ae512",
+      "updatedAt": "2026-06-04T17:40:23.743Z"
     }
   ]
 }

@@ -53,17 +53,24 @@ export class RouterService {
         process.cwd(),
         'artifacts',
         'contracts',
-        'JvdRouter.sol',
-        'JvdRouter.json'
+        'JvdEgcrRouter.sol',
+        'JvdEgcrRouter.json'
       );
       const data = await fs.promises.readFile(artifactPath, 'utf8');
       const artifact = JSON.parse(data);
       return artifact.abi;
     } catch (err) {
-      console.warn('[RouterService] Warning: Could not load JvdRouter JSON artifact. Using minimal ABI fallback.', err.message);
+      console.warn('[RouterService] Warning: Could not load JvdEgcrRouter JSON artifact. Using minimal ABI fallback.', err.message);
       return [
         'function settle(address token, address recipient, uint256 amount) external',
-        'event SettlementExecuted(address indexed recipient, address indexed token, uint256 amount)'
+        'function route(address from, address to, uint256 amount, address token) external returns (bool)',
+        'function route721(address from, address to, uint256 tokenId, address token) external returns (bool)',
+        'function route998(address from, address to, uint256 tokenId, address token) external returns (bool)',
+        'function settleWithJvdEgcr(address token, address recipient, uint256 amount, string orderId) external returns (bool)',
+        'event SettlementExecuted(address indexed recipient, address indexed token, uint256 amount, string orderId)',
+        'event RouteERC20(address indexed from, address indexed to, uint256 amount, address token)',
+        'event RouteERC721(address indexed from, address indexed to, uint256 tokenId, address token)',
+        'event RouteERC998(address indexed from, address indexed to, uint256 tokenId, address token)'
       ];
     }
   }
