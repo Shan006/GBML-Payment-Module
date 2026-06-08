@@ -4,7 +4,8 @@
  */
 
 import { useState } from 'react';
-import { updateServices, disableBlockchain, getModuleTypeInfo } from '../services/orchestrator.service';
+import { updateServices, disableBlockchain, enableBlockchain, getModuleTypeInfo } from '../services/orchestrator.service';
+import CopyableAddress from './ui/CopyableAddress';
 
 function BlockchainModuleCard({ module, role, onUpdate }) {
   const [loading, setLoading] = useState(false);
@@ -55,6 +56,31 @@ function BlockchainModuleCard({ module, role, onUpdate }) {
     }
   };
 
+  const handleReEnable = async () => {
+    if (role !== 'admin') return;
+    
+    if (!confirm(`Are you sure you want to re-enable blockchain for ${module.moduleId}?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      await enableBlockchain({
+        moduleId: module.moduleId,
+        moduleType: module.moduleType
+      });
+
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error('Error re-enabling blockchain:', err);
+      setError(err.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'ACTIVE': return '#4ecdc4';
@@ -82,8 +108,7 @@ function BlockchainModuleCard({ module, role, onUpdate }) {
       padding: '1.5rem',
       backdropFilter: 'blur(10px)',
       border: '1px solid rgba(255,255,255,0.2)',
-      transition: 'transform 0.2s, box-shadow 0.2s',
-      cursor: 'pointer'
+      transition: 'transform 0.2s, box-shadow 0.2s'
     }}
     onMouseEnter={(e) => {
       e.currentTarget.style.transform = 'translateY(-4px)';
@@ -93,7 +118,6 @@ function BlockchainModuleCard({ module, role, onUpdate }) {
       e.currentTarget.style.transform = 'translateY(0)';
       e.currentTarget.style.boxShadow = 'none';
     }}
-    onClick={() => setShowDetails(!showDetails)}
     >
       {/* Header */}
       <div style={{ marginBottom: '1rem' }}>
@@ -103,7 +127,7 @@ function BlockchainModuleCard({ module, role, onUpdate }) {
           alignItems: 'flex-start',
           marginBottom: '0.5rem'
         }}>
-          <div>
+          <div style={{ flex: 1 }}>
             <h3 style={{ margin: 0, color: 'white', fontSize: '1.2rem' }}>
               {module.moduleId}
             </h3>
@@ -120,47 +144,65 @@ function BlockchainModuleCard({ module, role, onUpdate }) {
             </div>
           </div>
 
+          <button
+            onClick={() => setShowDetails(!showDetails)}
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '8px',
+              padding: '0.5rem 0.75rem',
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: '1rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              marginLeft: '0.75rem'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(255,255,255,0.2)';
+              e.target.style.color = 'white';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'rgba(255,255,255,0.1)';
+              e.target.style.color = 'rgba(255,255,255,0.7)';
+            }}
+          >
+            {showDetails ? '▲' : '▼'}
+          </button>
+        </div>
+
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: '0.5rem'
+        }}>
+          <div style={{
+            fontSize: '0.85rem',
+            color: getStatusColor(module.status),
+            fontWeight: 600
+          }}>
+            {module.status}
+          </div>
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            fontSize: '1.5rem'
+            fontSize: '1.2rem'
           }}>
             <span>{getStatusIcon(module.status)}</span>
           </div>
         </div>
-
-        <div style={{
-          fontSize: '0.85rem',
-          color: getStatusColor(module.status),
-          fontWeight: 600,
-          marginTop: '0.5rem'
-        }}>
-          {module.status}
-        </div>
       </div>
 
       {/* Contract Address */}
-      <div style={{
-        background: 'rgba(0,0,0,0.2)',
-        padding: '0.75rem',
-        borderRadius: '8px',
-        marginBottom: '1rem'
-      }}>
-        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.25rem' }}>
-          Contract Address
-        </div>
-        <code style={{
-          fontSize: '0.85rem',
-          color: 'white',
-          wordBreak: 'break-all'
-        }}>
-          {module.contractAddress}
-        </code>
-      </div>
+      <CopyableAddress 
+        address={module.contractAddress}
+        label="Contract Address"
+        style={{ marginBottom: '1rem' }}
+      />
 
       {/* Services */}
-      <div style={{ marginBottom: '1rem' }}>
+      {/* <div style={{ marginBottom: '1rem' }}>
         <div style={{
           fontSize: '0.85rem',
           color: 'rgba(255,255,255,0.7)',
@@ -198,7 +240,7 @@ function BlockchainModuleCard({ module, role, onUpdate }) {
             disabled={loading || role !== 'admin'}
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Details (expandable) */}
       {showDetails && (
@@ -208,48 +250,24 @@ function BlockchainModuleCard({ module, role, onUpdate }) {
           borderTop: '1px solid rgba(255,255,255,0.1)'
         }}>
           {module.walletAddress && (
-            <div style={{ marginBottom: '0.75rem' }}>
-              <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.25rem' }}>
-                Module Wallet
-              </div>
-              <code style={{
-                fontSize: '0.75rem',
-                color: 'rgba(255,255,255,0.8)',
-                wordBreak: 'break-all'
-              }}>
-                {module.walletAddress}
-              </code>
-            </div>
+            <CopyableAddress 
+              address={module.walletAddress}
+              label="Module Wallet"
+            />
           )}
 
           {module.jvdRouterAddress && (
-            <div style={{ marginBottom: '0.75rem' }}>
-              <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.25rem' }}>
-                JVD Router
-              </div>
-              <code style={{
-                fontSize: '0.75rem',
-                color: 'rgba(255,255,255,0.8)',
-                wordBreak: 'break-all'
-              }}>
-                {module.jvdRouterAddress}
-              </code>
-            </div>
+            <CopyableAddress 
+              address={module.jvdRouterAddress}
+              label="JVD Router"
+            />
           )}
 
           {module.deploymentTxHash && (
-            <div style={{ marginBottom: '0.75rem' }}>
-              <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.25rem' }}>
-                Deployment Transaction
-              </div>
-              <code style={{
-                fontSize: '0.75rem',
-                color: 'rgba(255,255,255,0.8)',
-                wordBreak: 'break-all'
-              }}>
-                {module.deploymentTxHash}
-              </code>
-            </div>
+            <CopyableAddress 
+              address={module.deploymentTxHash}
+              label="Deployment Transaction"
+            />
           )}
 
           {module.createdAt && (
@@ -259,28 +277,55 @@ function BlockchainModuleCard({ module, role, onUpdate }) {
           )}
 
           {/* Admin Actions */}
-          {role === 'admin' && module.enabled && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDisable();
-              }}
-              disabled={loading}
-              style={{
-                marginTop: '1rem',
-                width: '100%',
-                padding: '0.75rem',
-                background: 'rgba(255, 107, 107, 0.2)',
-                border: '1px solid rgba(255, 107, 107, 0.5)',
-                color: '#ff6b6b',
-                borderRadius: '8px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                fontSize: '0.9rem',
-                fontWeight: 600
-              }}
-            >
-              {loading ? '⏳ Disabling...' : '🛑 Disable Blockchain'}
-            </button>
+          {role === 'admin' && (
+            <>
+              {module.enabled ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDisable();
+                  }}
+                  disabled={loading}
+                  style={{
+                    marginTop: '1rem',
+                    width: '100%',
+                    padding: '0.75rem',
+                    background: 'rgba(255, 107, 107, 0.2)',
+                    border: '1px solid rgba(255, 107, 107, 0.5)',
+                    color: '#ff6b6b',
+                    borderRadius: '8px',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: 600
+                  }}
+                >
+                  {loading ? '⏳ Disabling...' : '🛑 Disable Blockchain'}
+                </button>
+              ) : (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleReEnable();
+                  }}
+                  disabled={loading}
+                  style={{
+                    marginTop: '1rem',
+                    width: '100%',
+                    padding: '0.75rem',
+                    background: 'linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)',
+                    border: 'none',
+                    color: 'white',
+                    borderRadius: '8px',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    boxShadow: '0 4px 15px rgba(78, 205, 196, 0.4)'
+                  }}
+                >
+                  {loading ? '⏳ Re-enabling...' : '✅ Re-enable Module'}
+                </button>
+              )}
+            </>
           )}
         </div>
       )}
@@ -299,16 +344,6 @@ function BlockchainModuleCard({ module, role, onUpdate }) {
           {error}
         </div>
       )}
-
-      {/* Click to expand hint */}
-      <div style={{
-        marginTop: '1rem',
-        textAlign: 'center',
-        fontSize: '0.75rem',
-        color: 'rgba(255,255,255,0.5)'
-      }}>
-        {showDetails ? '▲ Click to collapse' : '▼ Click to expand'}
-      </div>
     </div>
   );
 }

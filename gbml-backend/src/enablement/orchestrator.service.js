@@ -49,6 +49,40 @@ export class OrchestratorService {
 
       const existing = await this.enablementRepository.findByModuleId(moduleId);
       if (existing) {
+        // Check if module is disabled - allow re-enablement
+        if (existing.blockchainEnabled === false || existing.status === 'INACTIVE') {
+          console.log(`[Orchestrator] Module ${moduleId} is disabled, re-enabling...`);
+          
+          // Re-enable by updating status and blockchainEnabled flag
+          await this.enablementRepository.update(moduleId, {
+            blockchainEnabled: true,
+            status: 'ACTIVE'
+          });
+
+          // Sync to dashboard
+          await syncModuleToDashboard({
+            moduleId,
+            contractType: existing.moduleType,
+            contractAddress: existing.contractAddress,
+            enabled: true,
+            walletAddress: await this.walletService.getModuleWalletAddress(moduleId)
+          });
+
+          const walletAddress = await this.walletService.getModuleWalletAddress(moduleId);
+          const jvdRouterAddress = await this.getJvdRouterAddress();
+          
+          return this.buildResult({
+            success: true,
+            alreadyEnabled: false,
+            reEnabled: true,
+            module: existing.toResponse(),
+            walletAddress,
+            jvdRouterAddress,
+            kycEnabled: existing.walletEnabled
+          });
+        }
+        
+        // Module is already active
         console.log(`[Orchestrator] Module ${moduleId} already enabled`);
         const walletAddress = await this.walletService.getModuleWalletAddress(moduleId);
         const jvdRouterAddress = await this.getJvdRouterAddress();

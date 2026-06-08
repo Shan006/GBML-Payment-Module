@@ -30,11 +30,29 @@
     {
       "moduleId": "NFT-COL",
       "contractType": "NFT",
-      "contractAddress": "0xCccbD0546223bf9bfecB383D422dAe1156066Cd1",
-      "enabled": true,
+      "contractAddress": "0x5249a07eca60e1b786a1464eeb7813d30907e47b",
+      "enabled": false,
       "walletAddress": "0x1712b5df9e7cfd79005292c063094288394ab977",
+      "jvdRouterAddress": null,
+      "updatedAt": "2026-06-04T17:52:45.028Z"
+    },
+    {
+      "moduleId": "Treasury Main",
+      "contractType": "TREASURY",
+      "contractAddress": "0xd993390f9260785e3de7253a7e53278f02b953ad",
+      "enabled": false,
+      "walletAddress": "0xb68f08dda4a8a6a8741fd017f8852d7891609c8d",
+      "jvdRouterAddress": null,
+      "updatedAt": "2026-06-04T18:26:04.032Z"
+    },
+    {
+      "moduleId": "NFT Collection 01",
+      "contractType": "NFT",
+      "contractAddress": "0x62ac71D3df6309462a0689d99E13941162d47f1b",
+      "enabled": true,
+      "walletAddress": "0x9581bcf920d11cfab08377221abcf6a3456fa51b",
       "jvdRouterAddress": "0xbf3902ea819ecd136e407d29cf9c6bf1f08ae512",
-      "updatedAt": "2026-06-04T17:40:23.743Z"
+      "updatedAt": "2026-06-04T19:52:57.610Z"
     }
   ]
 }

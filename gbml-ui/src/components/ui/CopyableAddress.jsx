@@ -30,9 +30,10 @@ function CopyableAddress({
   };
 
   const isTxHash = address.length === 66 && address.startsWith('0x');
+  const blockExplorerUrl = import.meta.env.VITE_BLOCK_EXPLORER_URL || 'https://explorer.jvdegcr.com';
   const defaultExplorer = isTxHash 
-    ? `https://juvidoe-explorer.io/tx/${address}`
-    : `https://juvidoe-explorer.io/address/${address}`;
+    ? `${blockExplorerUrl}/tx/${address}`
+    : `${blockExplorerUrl}/address/${address}`;
   const finalExplorerUrl = explorerUrl || defaultExplorer;
 
   return (
