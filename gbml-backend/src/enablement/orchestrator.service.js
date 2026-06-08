@@ -7,6 +7,8 @@ import { RouterService } from '../settlements/router.service.js';
 import { WalletService } from '../wallets/wallets.service.js';
 import { syncModuleToDashboard } from './dashboard.service.js';
 import { logBlockchainEnable, logModuleKycBind } from '../services/audit.service.js';
+import { ModuleRegistryService } from './module-registry.service.js';
+import { config } from '../config/env.js';
 
 /**
  * Orchestrator Service
@@ -20,6 +22,7 @@ export class OrchestratorService {
     this.enablementRepository = new EnablementRepository();
     this.routerService = new RouterService();
     this.walletService = new WalletService();
+    this.moduleRegistryService = new ModuleRegistryService();
   }
 
   MODULE_CONTRACTS = {
@@ -37,11 +40,24 @@ export class OrchestratorService {
    * Main orchestration method - enables blockchain for a module
    */
   async enableBlockchain(request, identity = {}) {
-    const { moduleId, moduleType, constructorParams } = request;
+    const { moduleId, moduleType, constructorParams, contractDefinitions } = request;
 
     console.log(`[Orchestrator] Starting blockchain enablement for module ${moduleId} of type ${moduleType}`);
 
     try {
+      // Check if this is a custom module
+      const isCustomModule = moduleType && moduleType.startsWith('CUSTOM_');
+      
+      if (isCustomModule) {
+        return await this.enableCustomModule({
+          moduleId,
+          moduleType,
+          contractDefinitions,
+          identity
+        });
+      }
+
+      // Existing logic for predefined modules
       const contractType = this.determineContractType(moduleType);
       if (!contractType) {
         throw new Error(`Unsupported module type: ${moduleType}`);
@@ -405,5 +421,107 @@ export class OrchestratorService {
       moduleId,
       status: 'INACTIVE'
     };
+  }
+
+  /**
+   * Enable a custom module with dynamic contract composition
+   * @param {Object} request - Custom module enablement request
+   * @returns {Promise<Object>} Enablement result
+   */
+  async enableCustomModule({ moduleId, moduleType, contractDefinitions, identity = {} }) {
+    console.log(`[Orchestrator] Enabling custom module ${moduleId} of type ${moduleType}`);
+
+    // Step 1: Ensure JVD EGCR settlement router is registered (mandatory routing layer)
+    const jvdRouterAddress = await this.routerService.checkAndDeployRouter();
+    if (!jvdRouterAddress) {
+      throw new Error('JVD Router is required but could not be deployed or resolved');
+    }
+
+    // Step 2: Auto-bind module wallet (treasury / owner for contracts)
+    const { walletAddress } = await this.walletService.createOrGetModuleWallet(moduleId);
+    console.log(`[Orchestrator] Module wallet bound: ${walletAddress}`);
+
+    // Step 3: Deploy all contracts in the custom module
+    console.log(`[Orchestrator] Deploying ${contractDefinitions.length} contracts for custom module...`);
+    
+    const sharedParams = {
+      walletAddress,
+      routerAddress: jvdRouterAddress,
+      moduleId,
+      treasuryAddress: config.treasuryAddress || walletAddress
+    };
+
+    const deployments = await this.deploymentService.deployCustomContracts(
+      contractDefinitions,
+      sharedParams
+    );
+
+    console.log(`[Orchestrator] All contracts deployed successfully`);
+
+    // Step 4: Register all deployed contracts
+    for (const deployment of deployments) {
+      await this.registerContract({
+        contractName: `${moduleType}_${deployment.contractName}`,
+        contractType: deployment.contractType,
+        contractAddress: deployment.contractAddress,
+        moduleId
+      });
+    }
+
+    // Step 5: Enable platform services (default to wallet and settlement for custom modules)
+    const services = await this.attachPlatformServices(moduleId, moduleType);
+
+    // Step 6: KYC enforcement flag - module wallet bound for on-chain interactions
+    const kycEnabled = true;
+    await logModuleKycBind({
+      moduleId,
+      moduleType,
+      walletAddress,
+      kycEnabled
+    });
+
+    // Step 7: Create enablement record
+    const enablementRecord = await this.enablementRepository.save({
+      id: uuid(),
+      moduleId,
+      serviceId: moduleId,
+      moduleType,
+      contractAddress: deployments[0].contractAddress, // Primary contract address
+      status: 'ACTIVE',
+      blockchainEnabled: true,
+      walletEnabled: services.wallet,
+      settlementEnabled: services.settlement,
+      conversionEnabled: services.conversion,
+      contracts: JSON.stringify(deployments) // Store all contract addresses
+    });
+
+    // Step 8: Sync to dashboard
+    await syncModuleToDashboard({
+      moduleId,
+      contractType: moduleType,
+      contractAddress: deployments[0].contractAddress,
+      enabled: true,
+      walletAddress
+    });
+
+    // Step 9: Log blockchain enablement
+    await logBlockchainEnable({
+      moduleId,
+      moduleType,
+      contractAddress: deployments[0].contractAddress,
+      walletAddress,
+      jvdRouterAddress,
+      kycEnabled
+    });
+
+    return this.buildResult({
+      success: true,
+      module: enablementRecord.toResponse(),
+      deployments,
+      walletAddress,
+      jvdRouterAddress,
+      kycEnabled,
+      isCustomModule: true
+    });
   }
 }

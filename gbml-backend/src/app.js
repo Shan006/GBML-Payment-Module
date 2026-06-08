@@ -10,6 +10,7 @@ import deploymentRoutes from "./deployment/deployment.routes.js";
 import enablementRoutes from "./enablement/enablement.routes.js";
 import settlementsRoutes from "./settlements/settlements.routes.js";
 import walletsRoutes from "./wallets/wallets.routes.js";
+import { setupCustomModuleRoutes } from "./enablement/module-registry.routes.js";
 import { authenticateApiKey } from "./middleware/api-key.js";
 
 
@@ -73,6 +74,10 @@ app.use("/gbml/settlements", settlementsRoutes);
 // Available as /wallets (per spec) and /gbml/wallets (for consistency)
 app.use("/wallets", walletsRoutes);
 app.use("/gbml/wallets", walletsRoutes);
+
+// Custom Module Registry routes
+// Available as /custom-modules and /gbml/custom-modules
+setupCustomModuleRoutes(app);
 
 
 

@@ -98,4 +98,46 @@ export class DeploymentService {
       txHash: txHash
     };
   }
+
+  /**
+   * Deploy multiple custom contracts for a custom module
+   * @param {Array} contractDefinitions - Array of contract definitions
+   * @param {Object} sharedParams - Shared parameters (walletAddress, routerAddress, etc.)
+   * @returns {Promise<Array>} Array of deployment results
+   */
+  async deployCustomContracts(contractDefinitions, sharedParams = {}) {
+    console.log(`[DeploymentService] Deploying ${contractDefinitions.length} custom contracts`);
+    
+    // Use ContractFactoryService to deploy custom contracts
+    const deployments = await this.factoryService.deployCustomContracts(
+      contractDefinitions,
+      sharedParams
+    );
+
+    // Register each deployed contract
+    for (const deployment of deployments) {
+      try {
+        const registerDto = new CreateContractDto({
+          serviceId: `${sharedParams.moduleId}_${deployment.contractName}`,
+          contractName: deployment.contractName,
+          contractType: deployment.contractType,
+          contractAddress: deployment.contractAddress,
+          abi: deployment.abi
+        });
+
+        const validation = CreateContractDto.validate(registerDto);
+        if (!validation.isValid) {
+          console.error(`[DeploymentService] Registry validation failed for ${deployment.contractName}:`, validation.errors);
+          continue;
+        }
+
+        await this.contractsService.createContract(registerDto);
+        console.log(`[DeploymentService] Custom contract ${deployment.contractName} registered successfully`);
+      } catch (regErr) {
+        console.error(`[DeploymentService] Warning: Failed to register custom contract ${deployment.contractName}:`, regErr);
+      }
+    }
+
+    return deployments;
+  }
 }
