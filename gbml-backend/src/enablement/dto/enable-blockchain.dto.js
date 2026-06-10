@@ -56,11 +56,30 @@ export class EnableBlockchainDto {
           if (!contract.contractType || typeof contract.contractType !== 'string') {
             errors.push(`contractDefinitions[${index}].contractType is required`);
           }
-          if (!contract.abi || !Array.isArray(contract.abi)) {
-            errors.push(`contractDefinitions[${index}].abi must be a valid ABI array`);
-          }
-          if (!contract.bytecode || typeof contract.bytecode !== 'string') {
-            errors.push(`contractDefinitions[${index}].bytecode is required`);
+          
+          // For standard contract types (TOKEN, NFT, etc.), ABI and bytecode can be empty
+          // as they will be loaded from standard templates
+          // For CUSTOM contract type, ABI and bytecode are required
+          const standardContractTypes = ['TOKEN', 'NFT', 'TREASURY', 'ROUTER', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT', 'BUNDLE', 'GOVERNANCE'];
+          const isStandardType = standardContractTypes.includes(contract.contractType?.toUpperCase());
+          
+          if (!isStandardType) {
+            // Custom contracts require ABI and bytecode
+            if (!contract.abi || !Array.isArray(contract.abi) || contract.abi.length === 0) {
+              errors.push(`contractDefinitions[${index}].abi must be a valid non-empty ABI array for custom contracts`);
+            }
+            if (!contract.bytecode || typeof contract.bytecode !== 'string' || contract.bytecode.trim() === '') {
+              errors.push(`contractDefinitions[${index}].bytecode is required for custom contracts`);
+            }
+          } else {
+            // Standard contracts: ABI and bytecode are optional (will be loaded from templates)
+            // But if provided, validate the format
+            if (contract.abi !== undefined && contract.abi !== null && !Array.isArray(contract.abi)) {
+              errors.push(`contractDefinitions[${index}].abi must be a valid array if provided`);
+            }
+            if (contract.bytecode !== undefined && contract.bytecode !== null && typeof contract.bytecode !== 'string') {
+              errors.push(`contractDefinitions[${index}].bytecode must be a string if provided`);
+            }
           }
         });
       }

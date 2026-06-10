@@ -9,6 +9,9 @@ import ApiKeyManagement from './components/ApiKeyManagement'
 import DisbursementManagement from './components/DisbursementManagement'
 import WalletDashboard from './components/WalletDashboard'
 import BlockchainModules from './components/BlockchainModules'
+import DynamicNavigation from './components/DynamicNavigation'
+import DynamicDashboard from './components/DynamicDashboard'
+import CustomModuleBuilder from './components/CustomModuleBuilder'
 import { supabase } from './supabase'
 import axios from 'axios'
 import './App.css'
@@ -19,6 +22,8 @@ function App() {
   const [selectedModule, setSelectedModule] = useState(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [activeTab, setActiveTab] = useState('standard')
+  const [showCustomModuleBuilder, setShowCustomModuleBuilder] = useState(false)
+  const [selectedDynamicModule, setSelectedDynamicModule] = useState(null)
 
   useEffect(() => {
     // Get initial session
@@ -71,6 +76,24 @@ function App() {
 
   const handleSelectModule = (module) => {
     setSelectedModule(module)
+  }
+
+  const handleDynamicModuleSelect = (module) => {
+    if (module.type === 'standard') {
+      setActiveTab(module.tab)
+      setSelectedDynamicModule(null)
+    } else if (module.type === 'admin') {
+      setActiveTab('admin')
+      setSelectedDynamicModule(null)
+    } else {
+      setSelectedDynamicModule(module)
+      setActiveTab('dynamic')
+    }
+  }
+
+  const handleCustomModuleCreated = () => {
+    setShowCustomModuleBuilder(false)
+    setRefreshTrigger(prev => prev + 1)
   }
 
   const handleLogout = async () => {
@@ -180,6 +203,24 @@ function App() {
             🔗 Blockchain
           </button>
 
+          <button
+            className={`tab-button ${activeTab === 'dynamic' ? 'active' : ''}`}
+            onClick={() => setActiveTab('dynamic')}
+            style={{
+              padding: '1rem 2rem',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              background: activeTab === 'dynamic' ? 'white' : 'rgba(255,255,255,0.2)',
+              color: activeTab === 'dynamic' ? '#764ba2' : 'white',
+              fontWeight: 600,
+              fontSize: '1.1rem',
+              transition: 'all 0.3s'
+            }}
+          >
+            🚀 Dynamic Modules
+          </button>
+
           {(role === 'admin' || role === 'TREASURY' || role === 'COMPLIANCE') && (
             <button
               className={`tab-button ${activeTab === 'admin' ? 'active' : ''}`}
@@ -240,6 +281,54 @@ function App() {
           <WalletDashboard session={session} />
         ) : activeTab === 'blockchain' ? (
           <BlockchainModules role={role} />
+        ) : activeTab === 'dynamic' ? (
+          <div style={{ padding: '2rem' }}>
+            {selectedDynamicModule ? (
+              <DynamicDashboard moduleId={selectedDynamicModule.moduleId} role={role} />
+            ) : (
+              <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '2rem'
+                }}>
+                  <div>
+                    <h2 style={{ margin: 0, fontSize: '2rem', color: 'white' }}>
+                      🚀 Dynamic Modules
+                    </h2>
+                    <p style={{ margin: '0.5rem 0 0 0', color: 'rgba(255,255,255,0.7)' }}>
+                      Manage custom and dynamically registered modules
+                    </p>
+                  </div>
+                  {role === 'admin' && (
+                    <button
+                      onClick={() => setShowCustomModuleBuilder(true)}
+                      style={{
+                        padding: '1rem 2rem',
+                        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontSize: '1rem',
+                        fontWeight: 600,
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      + Create Custom Module
+                    </button>
+                  )}
+                </div>
+
+                <DynamicNavigation
+                  onModuleSelect={handleDynamicModuleSelect}
+                  selectedModuleId={selectedDynamicModule?.moduleId}
+                  role={role}
+                />
+              </div>
+            )}
+          </div>
         ) : (
           <div className="admin-section" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <ApiKeyManagement />
@@ -247,6 +336,35 @@ function App() {
           </div>
         )}
       </main>
+
+      {/* Custom Module Builder Modal Overlay */}
+      {showCustomModuleBuilder && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '2rem',
+          overflow: 'auto'
+        }}>
+          <div style={{
+            maxWidth: '100%',
+            maxHeight: '100%',
+            overflow: 'auto'
+          }}>
+            <CustomModuleBuilder
+              onSuccess={handleCustomModuleCreated}
+              onCancel={() => setShowCustomModuleBuilder(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

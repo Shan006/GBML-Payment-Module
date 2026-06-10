@@ -45,38 +45,20 @@ CREATE POLICY "Anyone can read enabled custom modules"
   FOR SELECT
   USING (enabled = true);
 
--- Policy: Admins can insert custom modules
-CREATE POLICY "Admins can insert custom modules"
+-- Policy: Authenticated users can insert custom modules
+CREATE POLICY "Authenticated users can insert custom modules"
   ON custom_module_definitions
   FOR INSERT
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM users
-      WHERE users.id = auth.uid()
-      AND users.role = 'admin'
-    )
-  );
+  WITH CHECK (auth.uid() IS NOT NULL);
 
--- Policy: Admins can update custom modules
-CREATE POLICY "Admins can update custom modules"
+-- Policy: Authenticated users can update custom modules
+CREATE POLICY "Authenticated users can update custom modules"
   ON custom_module_definitions
   FOR UPDATE
-  USING (
-    EXISTS (
-      SELECT 1 FROM users
-      WHERE users.id = auth.uid()
-      AND users.role = 'admin'
-    )
-  );
+  USING (auth.uid() IS NOT NULL);
 
--- Policy: Admins can delete custom modules
-CREATE POLICY "Admins can delete custom modules"
+-- Policy: Authenticated users can delete custom modules
+CREATE POLICY "Authenticated users can delete custom modules"
   ON custom_module_definitions
   FOR DELETE
-  USING (
-    EXISTS (
-      SELECT 1 FROM users
-      WHERE users.id = auth.uid()
-      AND users.role = 'admin'
-    )
-  );
+  USING (auth.uid() IS NOT NULL);

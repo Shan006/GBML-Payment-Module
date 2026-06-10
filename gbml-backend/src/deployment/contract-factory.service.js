@@ -82,10 +82,23 @@ export class ContractFactoryService {
 
     for (const contractDef of contractDefinitions) {
       try {
-        console.log(`[ContractFactoryService] Deploying custom contract: ${contractDef.contractName}`);
+        console.log(`[ContractFactoryService] Deploying contract: ${contractDef.contractName} (type: ${contractDef.contractType})`);
         
-        // Load artifact from custom definition
-        const artifact = this.loadCustomArtifact(contractDef);
+        // Determine if this is a standard contract type or custom
+        const standardContractTypes = ['TOKEN', 'NFT', 'TREASURY', 'ROUTER', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT', 'BUNDLE', 'GOVERNANCE'];
+        const isStandardType = standardContractTypes.includes(contractDef.contractType?.toUpperCase());
+        
+        let artifact;
+        
+        if (isStandardType) {
+          // Load from standard artifact templates
+          console.log(`[ContractFactoryService] Loading standard artifact for ${contractDef.contractType}`);
+          artifact = this.loadArtifact(contractDef.contractType);
+        } else {
+          // Load from custom definition
+          console.log(`[ContractFactoryService] Loading custom artifact for ${contractDef.contractName}`);
+          artifact = this.loadCustomArtifact(contractDef);
+        }
         
         // Resolve constructor parameters
         const constructorParams = this.resolveConstructorParams(
