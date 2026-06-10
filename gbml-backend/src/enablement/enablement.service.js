@@ -23,7 +23,11 @@ export class EnablementService {
       jvdRouterAddress: result.jvdRouterAddress,
       kycEnabled: result.kycEnabled,
       alreadyEnabled: result.alreadyEnabled || false,
-      deployment: result.deployment
+      isCustomModule: result.isCustomModule || false,
+      deployment: result.deployment,
+      deployments: result.deployments,
+      capabilities: module.capabilities,
+      bindings: module.bindings || result.bindings?.endpoints
     };
   }
 
@@ -31,7 +35,16 @@ export class EnablementService {
    * Enable blockchain for a module
    */
   async enableBlockchain(request, identity = {}) {
-    const { moduleId, moduleType, serviceId, constructorParams } = request;
+    const {
+      moduleId,
+      moduleType,
+      serviceId,
+      constructorParams,
+      contractDefinitions,
+      services,
+      compliance,
+      switchable
+    } = request;
     const targetModuleId = moduleId || serviceId;
 
     if (!targetModuleId || !moduleType) {
@@ -44,7 +57,11 @@ export class EnablementService {
       {
         moduleId: targetModuleId,
         moduleType,
-        constructorParams
+        constructorParams,
+        contractDefinitions,
+        services,
+        compliance,
+        switchable
       },
       identity
     );

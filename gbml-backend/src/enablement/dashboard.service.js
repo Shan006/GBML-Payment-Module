@@ -28,6 +28,17 @@ export async function syncModuleToDashboard(entry) {
     enabled: entry.enabled !== false,
     walletAddress: entry.walletAddress || null,
     jvdRouterAddress: entry.jvdRouterAddress || null,
+    isCustom: entry.isCustom || entry.moduleType?.startsWith?.('CUSTOM_') || false,
+    moduleName: entry.moduleName || null,
+    contracts: entry.contracts || null,
+    services: entry.services || null,
+    compliance: entry.compliance || null,
+    switchable: entry.switchable || null,
+    capabilities: entry.capabilities || null,
+    endpoints: entry.endpoints || null,
+    platformIntegrations: entry.platformIntegrations || null,
+    uiProperties: entry.uiProperties || null,
+    boundAt: entry.boundAt || null,
     updatedAt: new Date().toISOString()
   };
 

@@ -5,6 +5,7 @@ import { CreateContractDto } from '../contracts/dto/create-contract.dto.js';
 const CONTRACTS = {
   TOKEN: 'JRC20WithJvdRouter',
   NFT: 'JRC721WithJvdRouter',
+  BUNDLE: 'JRC721WithJvdRouter',
   TREASURY: 'Treasury',
   ROUTER: 'Router',
   JVD_ROUTER: 'JvdEgcrRouter'

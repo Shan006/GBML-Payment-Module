@@ -2,72 +2,75 @@
   "moduleId": "circular-economy-credits-sme",
   "moduleName": "Circular Economy Credits System for SMEs",
   "moduleType": "CUSTOM_CIRCULAR_ECONOMY",
-  "description": "A comprehensive circular economy credits system that enables SMEs to tokenize, trade, and manage sustainability credits through a multi-contract architecture combining Tokenization, Bundle NFTs, and DAO governance.",
+  "description": "Token + Bundle NFT + DAO governance stack for SME sustainability credits. All token/NFT transfers route through JVD/EGCR settlement rails with KYC/AML compliance hooks.",
   "contracts": [
     {
       "contractName": "CircularCreditsToken",
       "contractType": "TOKEN",
-      "abi": [
-        {
-          "inputs": [
-            { "internalType": "string", "name": "name", "type": "string" },
-            { "internalType": "string", "name": "symbol", "type": "string" },
-            { "internalType": "uint8", "name": "decimals", "type": "uint8" },
-            { "internalType": "uint256", "name": "initialSupply", "type": "uint256" },
-            { "internalType": "address", "name": "treasury", "type": "address" },
-            { "internalType": "address", "name": "router", "type": "address" }
-          ],
-          "stateMutability": "nonpayable",
-          "type": "constructor"
-        },
-        {
-          "anonymous": false,
-          "inputs": [
-            { "indexed": true, "internalType": "address", "name": "from", "type": "address" },
-            { "indexed": true, "internalType": "address", "name": "to", "type": "address" },
-            { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }
-          ],
-          "name": "Transfer",
-          "type": "event"
-        },
-        {
-          "inputs": [
-            { "internalType": "address", "name": "recipient", "type": "address" },
-            { "internalType": "uint256", "name": "amount", "type": "uint256" }
-          ],
-          "name": "mint",
-          "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        }
-      ],
-      "bytecode": "0x608060405234801561001057600080fd5b50..."
+      "jrcStandard": "JRC-20",
+      "routeThroughJvdEgcr": true,
+      "constructorParams": [
+        "Circular Economy Credits",
+        "CEC",
+        18,
+        "1000000000000000000000000",
+        "{{walletAddress}}",
+        "{{routerAddress}}"
+      ]
     },
     {
       "contractName": "CreditBundleNFT",
-      "contractType": "NFT",
+      "contractType": "BUNDLE",
+      "jrcStandard": "JRC-998",
+      "routeThroughJvdEgcr": true,
+      "dependencies": ["CircularCreditsToken"],
+      "constructorParams": [
+        "Credit Bundle Collection",
+        "CBNDL",
+        "{{routerAddress}}"
+      ]
+    },
+    {
+      "contractName": "CreditsDAO",
+      "contractType": "GOVERNANCE",
+      "jrcStandard": "JRC-CUSTOM",
+      "routeThroughJvdEgcr": false,
+      "dependencies": ["CircularCreditsToken"],
       "abi": [
         {
           "inputs": [
-            { "internalType": "string", "name": "name", "type": "string" },
-            { "internalType": "string", "name": "symbol", "type": "string" },
-            { "internalType": "address", "name": "router", "type": "address" }
+            { "internalType": "address", "name": "token", "type": "address" },
+            { "internalType": "address", "name": "admin", "type": "address" }
           ],
           "stateMutability": "nonpayable",
           "type": "constructor"
         },
         {
           "inputs": [
-            { "internalType": "address", "name": "to", "type": "address" },
-            { "internalType": "uint256", "name": "tokenId", "type": "uint256" }
+            { "internalType": "string", "name": "description", "type": "string" },
+            { "internalType": "uint256", "name": "duration", "type": "uint256" }
           ],
-          "name": "mint",
+          "name": "createProposal",
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            { "internalType": "uint256", "name": "proposalId", "type": "uint256" },
+            { "internalType": "bool", "name": "support", "type": "bool" }
+          ],
+          "name": "vote",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"
         }
       ],
-      "bytecode": "0x608060405234801561001057600080fd5b50..."
+      "bytecode": "0x608060405234801561001057600080fd5b50...",
+      "constructorParams": [
+        "{{treasuryAddress}}",
+        "{{walletAddress}}"
+      ]
     }
   ],
   "services": {
@@ -78,5 +81,23 @@
   "compliance": {
     "kycRequired": true,
     "amlRequired": true
+  },
+  "switchable": {
+    "enabled": true,
+    "analytics": true,
+    "transactions": true,
+    "compliance": true,
+    "governance": true
+  },
+  "uiProperties": {
+    "icon": "🌍",
+    "primaryColor": "#43e97b",
+    "displayName": "Circular Economy Credits"
+  },
+  "platformIntegrations": ["GRANTS", "PAYMENTS", "CREDIT", "MARKETPLACE"],
+  "enablementPayload": {
+    "moduleId": "circular-economy-credits-sme",
+    "moduleType": "CUSTOM_CIRCULAR_ECONOMY",
+    "comment": "After registering via POST /gbml/custom-modules, enable with POST /gbml/enable-blockchain using only moduleId + moduleType (contractDefinitions resolved from registry)"
   }
 }

@@ -31,6 +31,17 @@ export const ComplianceConfig = {
 };
 
 /**
+ * Switchable feature flags for custom module routes
+ */
+export const SwitchableConfig = {
+  enabled: 'boolean',
+  analytics: 'boolean',
+  transactions: 'boolean',
+  compliance: 'boolean',
+  governance: 'boolean'
+};
+
+/**
  * UI Properties for a module (user-defined)
  */
 export const UIProperties = {
@@ -74,9 +85,15 @@ export const ModuleConfig = {
   
   // Compliance settings
   compliance: ComplianceConfig,
+
+  // Switchable feature flags
+  switchable: SwitchableConfig,
   
   // UI properties (user-defined for custom modules)
   uiProperties: UIProperties,
+
+  // Cross-platform integrations
+  platformIntegrations: 'array',
   
   // Capabilities (derived from contract composition)
   capabilities: ModuleCapabilities,

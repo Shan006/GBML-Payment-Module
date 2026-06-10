@@ -7,6 +7,11 @@ import {
   disableBlockchain,
   updateServices
 } from './enablement.controller.js';
+import {
+  getModuleBindings,
+  toggleModuleFeature,
+  getModuleCompliance
+} from './module-binding.controller.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -23,6 +28,11 @@ router.get('/stats', authenticate, getStats);
 
 // List all enabled modules
 router.get('/', authenticate, listModules);
+
+// Module binding & compliance routes (must be before /:moduleId catch-all)
+router.get('/:moduleId/bindings', authenticate, getModuleBindings);
+router.get('/:moduleId/compliance', authenticate, getModuleCompliance);
+router.patch('/:moduleId/switchable/:feature', authenticate, authorize(['admin']), toggleModuleFeature);
 
 // Get module status
 router.get('/:moduleId', authenticate, getModuleStatus);

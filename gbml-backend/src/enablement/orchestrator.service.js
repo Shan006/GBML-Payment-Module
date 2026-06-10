@@ -6,8 +6,10 @@ import { EnablementRepository } from './enablement.repository.js';
 import { RouterService } from '../settlements/router.service.js';
 import { WalletService } from '../wallets/wallets.service.js';
 import { syncModuleToDashboard } from './dashboard.service.js';
-import { logBlockchainEnable, logModuleKycBind } from '../services/audit.service.js';
+import { logBlockchainEnable } from '../services/audit.service.js';
 import { ModuleRegistryService } from './module-registry.service.js';
+import { moduleBindingService } from './module-binding.service.js';
+import { complianceService } from './compliance.service.js';
 import { config } from '../config/env.js';
 
 /**
@@ -40,7 +42,7 @@ export class OrchestratorService {
    * Main orchestration method - enables blockchain for a module
    */
   async enableBlockchain(request, identity = {}) {
-    const { moduleId, moduleType, constructorParams, contractDefinitions } = request;
+    const { moduleId, moduleType, constructorParams, contractDefinitions, services, compliance, switchable } = request;
 
     console.log(`[Orchestrator] Starting blockchain enablement for module ${moduleId} of type ${moduleType}`);
 
@@ -53,6 +55,9 @@ export class OrchestratorService {
           moduleId,
           moduleType,
           contractDefinitions,
+          services,
+          compliance,
+          switchable,
           identity
         });
       }
@@ -143,15 +148,15 @@ export class OrchestratorService {
       // Step 5: Enable platform services (wallet, settlement, conversion)
       const services = await this.attachPlatformServices(moduleId, moduleType);
 
-      // Step 6: KYC enforcement flag — module wallet bound for on-chain interactions
-      const kycEnabled = true;
-      await logModuleKycBind({
+      // Step 6: Compliance hooks — KYC/AML binding for on-chain interactions
+      const complianceResult = await complianceService.bindComplianceHooks({
         moduleId,
         moduleType,
+        compliance: { kycRequired: true, amlRequired: true },
         walletAddress,
-        contractAddress: deployment.contractAddress,
-        kycEnforced: true
+        contractAddress: deployment.contractAddress
       }, identity);
+      const kycEnabled = complianceResult.kycEnabled;
 
       // Step 7: Persist enablement record
       const enablementRecord = await this.saveEnablementRecord({
@@ -162,15 +167,25 @@ export class OrchestratorService {
         ...services
       });
 
-      // Step 8: Sync dashboard.json module ↔ contract map
-      await syncModuleToDashboard({
+      // Step 8: Bind endpoints and sync dashboard.json
+      await moduleBindingService.bindModule({
         moduleId,
-        contractType,
-        contractAddress: deployment.contractAddress,
-        enabled: true,
+        moduleType,
+        deployments: [{
+          contractName: `${moduleType}_${moduleId}`,
+          contractType,
+          contractAddress: deployment.contractAddress,
+          txHash: deployment.txHash
+        }],
+        services: {
+          wallet: services?.walletEnabled ?? true,
+          settlement: services?.settlementEnabled ?? services?.settlement ?? true,
+          conversion: services?.conversionEnabled ?? services?.conversion ?? false
+        },
+        compliance: { kycRequired: true, amlRequired: true },
         walletAddress,
         jvdRouterAddress
-      });
+      }, identity);
 
       // Step 9: Audit trail
       await logBlockchainEnable({
@@ -428,8 +443,43 @@ export class OrchestratorService {
    * @param {Object} request - Custom module enablement request
    * @returns {Promise<Object>} Enablement result
    */
-  async enableCustomModule({ moduleId, moduleType, contractDefinitions, identity = {} }) {
+  async enableCustomModule({ moduleId, moduleType, contractDefinitions, services, compliance, switchable, identity = {} }) {
     console.log(`[Orchestrator] Enabling custom module ${moduleId} of type ${moduleType}`);
+
+    const existing = await this.enablementRepository.findByModuleId(moduleId);
+    if (existing?.blockchainEnabled && existing.status === 'ACTIVE') {
+      const walletAddress = await this.walletService.getModuleWalletAddress(moduleId);
+      const jvdRouterAddress = await this.getJvdRouterAddress();
+      return this.buildResult({
+        success: true,
+        alreadyEnabled: true,
+        module: existing.toResponse(),
+        walletAddress,
+        jvdRouterAddress,
+        kycEnabled: existing.walletEnabled,
+        isCustomModule: true
+      });
+    }
+
+    // Resolve contract definitions from registry when not provided inline
+    let resolvedPayload;
+    if (!contractDefinitions || contractDefinitions.length === 0) {
+      resolvedPayload = await this.moduleRegistryService.resolveEnablementPayload(moduleId, {
+        moduleType,
+        services,
+        compliance,
+        switchable
+      });
+      contractDefinitions = resolvedPayload.contractDefinitions;
+      moduleType = resolvedPayload.moduleType;
+      services = resolvedPayload.services;
+      compliance = resolvedPayload.compliance;
+      switchable = resolvedPayload.switchable;
+    }
+
+    if (!contractDefinitions?.length) {
+      throw new Error('contractDefinitions is required for custom modules (provide inline or register via /gbml/custom-modules first)');
+    }
 
     // Step 1: Ensure JVD EGCR settlement router is registered (mandatory routing layer)
     const jvdRouterAddress = await this.routerService.checkAndDeployRouter();
@@ -441,9 +491,15 @@ export class OrchestratorService {
     const { walletAddress } = await this.walletService.createOrGetModuleWallet(moduleId);
     console.log(`[Orchestrator] Module wallet bound: ${walletAddress}`);
 
-    // Step 3: Deploy all contracts in the custom module
-    console.log(`[Orchestrator] Deploying ${contractDefinitions.length} contracts for custom module...`);
-    
+    // Enrich constructor params for standard JRC templates
+    const enrichedDefinitions = this.moduleRegistryService.enrichContractDefinitions(
+      contractDefinitions,
+      { moduleId, walletAddress, routerAddress: jvdRouterAddress }
+    );
+
+    // Step 3: Deploy all contracts in the custom module stack
+    console.log(`[Orchestrator] Deploying ${enrichedDefinitions.length} contracts for custom module...`);
+
     const sharedParams = {
       walletAddress,
       routerAddress: jvdRouterAddress,
@@ -452,7 +508,7 @@ export class OrchestratorService {
     };
 
     const deployments = await this.deploymentService.deployCustomContracts(
-      contractDefinitions,
+      enrichedDefinitions,
       sharedParams
     );
 
@@ -468,60 +524,80 @@ export class OrchestratorService {
       });
     }
 
-    // Step 5: Enable platform services (default to wallet and settlement for custom modules)
-    const services = await this.attachPlatformServices(moduleId, moduleType);
+    // Step 5: Enable platform services from registry definition or defaults
+    const serviceFlags = services
+      ? this.moduleRegistryService.deriveServiceFlags(services)
+      : await this.attachPlatformServices(moduleId, moduleType);
 
-    // Step 6: KYC enforcement flag - module wallet bound for on-chain interactions
-    const kycEnabled = true;
-    await logModuleKycBind({
+    // Step 6: Compliance hooks — KYC/AML binding
+    const complianceConfig = compliance || { kycRequired: true, amlRequired: true };
+    const complianceResult = await complianceService.bindComplianceHooks({
       moduleId,
       moduleType,
+      compliance: complianceConfig,
       walletAddress,
-      kycEnabled
-    });
-
-    // Step 7: Create enablement record
-    const enablementRecord = await this.enablementRepository.save({
-      id: uuid(),
-      moduleId,
-      serviceId: moduleId,
-      moduleType,
-      contractAddress: deployments[0].contractAddress, // Primary contract address
-      status: 'ACTIVE',
-      blockchainEnabled: true,
-      walletEnabled: services.wallet,
-      settlementEnabled: services.settlement,
-      conversionEnabled: services.conversion,
-      contracts: JSON.stringify(deployments) // Store all contract addresses
-    });
-
-    // Step 8: Sync to dashboard
-    await syncModuleToDashboard({
-      moduleId,
-      contractType: moduleType,
       contractAddress: deployments[0].contractAddress,
-      enabled: true,
-      walletAddress
+      contracts: deployments
+    }, identity);
+
+    // Step 7: Dynamic endpoint binding + dashboard sync
+    const binding = await moduleBindingService.bindModule({
+      moduleId,
+      moduleType,
+      moduleName: resolvedPayload?.moduleName,
+      deployments,
+      services: services || {
+        wallet: serviceFlags.walletEnabled,
+        settlement: serviceFlags.settlementEnabled,
+        conversion: serviceFlags.conversionEnabled
+      },
+      compliance: complianceConfig,
+      switchable: switchable || {},
+      walletAddress,
+      jvdRouterAddress,
+      uiProperties: resolvedPayload?.uiProperties || {},
+      platformIntegrations: resolvedPayload?.platformIntegrations || []
+    }, identity);
+
+    // Step 8: Persist enablement record
+    const enablementRecord = await this.saveEnablementRecord({
+      moduleId,
+      moduleType,
+      contractAddress: deployments[0].contractAddress,
+      deploymentTxHash: deployments[0].txHash,
+      ...serviceFlags
     });
 
-    // Step 9: Log blockchain enablement
+    // Step 9: Audit trail
     await logBlockchainEnable({
       moduleId,
       moduleType,
       contractAddress: deployments[0].contractAddress,
       walletAddress,
       jvdRouterAddress,
-      kycEnabled
-    });
+      kycEnabled: complianceResult.kycEnabled,
+      deployments: deployments.map((d) => ({
+        contractName: d.contractName,
+        contractAddress: d.contractAddress
+      })),
+      capabilities: binding.capabilities,
+      endpointCount: binding.endpoints.length
+    }, identity);
 
     return this.buildResult({
       success: true,
-      module: enablementRecord.toResponse(),
+      module: {
+        ...enablementRecord.toResponse(),
+        contracts: deployments,
+        capabilities: binding.capabilities,
+        bindings: binding.endpoints
+      },
       deployments,
       walletAddress,
       jvdRouterAddress,
-      kycEnabled,
-      isCustomModule: true
+      kycEnabled: complianceResult.kycEnabled,
+      isCustomModule: true,
+      bindings: binding
     });
   }
 }

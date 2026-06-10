@@ -7,6 +7,7 @@ import fs from 'fs';
 const CONTRACTS = {
   TOKEN: 'JRC20WithJvdRouter',
   NFT: 'JRC721WithJvdRouter',
+  BUNDLE: 'JRC721WithJvdRouter',
   TREASURY: 'Treasury',
   ROUTER: 'Router',
   JVD_ROUTER: 'JvdEgcrRouter'
@@ -85,8 +86,9 @@ export class ContractFactoryService {
         console.log(`[ContractFactoryService] Deploying contract: ${contractDef.contractName} (type: ${contractDef.contractType})`);
         
         // Determine if this is a standard contract type or custom
-        const standardContractTypes = ['TOKEN', 'NFT', 'TREASURY', 'ROUTER', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT', 'BUNDLE', 'GOVERNANCE'];
-        const isStandardType = standardContractTypes.includes(contractDef.contractType?.toUpperCase());
+        const type = contractDef.contractType?.toUpperCase();
+        const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT'];
+        const isStandardType = artifactBackedTypes.includes(type);
         
         let artifact;
         

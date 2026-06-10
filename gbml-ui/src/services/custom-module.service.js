@@ -128,6 +128,30 @@ export const getModuleNavigationItems = async () => {
 };
 
 /**
+ * Get dynamic endpoint bindings for a deployed module
+ * @param {string} moduleId - Module ID
+ * @returns {Promise<Object>} Bindings with endpoints, capabilities, switchable flags
+ */
+export const getModuleBindings = async (moduleId) => {
+  const response = await axios.get(`${API_BASE_URL}/blockchain-modules/${moduleId}/bindings`);
+  return response.data;
+};
+
+/**
+ * Toggle a switchable feature for a module
+ * @param {string} moduleId - Module ID
+ * @param {string} feature - Feature name (analytics, transactions, compliance, governance)
+ * @param {boolean} enabled - Whether to enable the feature
+ */
+export const toggleModuleFeature = async (moduleId, feature, enabled) => {
+  const response = await axios.patch(
+    `${API_BASE_URL}/blockchain-modules/${moduleId}/switchable/${feature}`,
+    { enabled }
+  );
+  return response.data;
+};
+
+/**
  * Get icon for module type
  * @param {string} moduleType - Module type
  * @returns {string} Icon emoji

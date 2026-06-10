@@ -2,12 +2,15 @@
  * DTO class for validating blockchain enablement requests
  */
 export class EnableBlockchainDto {
-  constructor({ moduleId, serviceId, moduleType, constructorParams, contractDefinitions }) {
+  constructor({ moduleId, serviceId, moduleType, constructorParams, contractDefinitions, services, compliance, switchable }) {
     this.moduleId = moduleId || serviceId;
     this.serviceId = serviceId || moduleId;
     this.moduleType = moduleType;
     this.constructorParams = constructorParams;
     this.contractDefinitions = contractDefinitions;
+    this.services = services;
+    this.compliance = compliance;
+    this.switchable = switchable;
   }
 
   /**
@@ -39,10 +42,8 @@ export class EnableBlockchainDto {
       errors.push('constructorParams must be a valid array if provided');
     }
 
-    // For custom modules, contractDefinitions is required
-    if (data.moduleType && data.moduleType.startsWith('CUSTOM_') && !data.contractDefinitions) {
-      errors.push('contractDefinitions is required for custom module types');
-    }
+    // For custom modules, contractDefinitions can be omitted if module is pre-registered in /gbml/custom-modules
+    // (orchestrator resolves from registry by moduleId)
 
     // Validate contractDefinitions if provided
     if (data.contractDefinitions) {

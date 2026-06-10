@@ -1,0 +1,141 @@
+{
+  "$schema": "https://juvidoe.io/schemas/gbml-module/v1",
+  "title": "GBML Module Configuration Schema",
+  "description": "Standardized schema for predefined and custom GBML module registration and binding",
+  "version": "1.0.0",
+  "definitions": {
+    "ContractDefinition": {
+      "type": "object",
+      "required": ["contractName", "contractType"],
+      "properties": {
+        "contractName": { "type": "string", "description": "Human-readable contract identifier within the module" },
+        "contractType": {
+          "type": "string",
+          "enum": ["TOKEN", "NFT", "BUNDLE", "TREASURY", "ROUTER", "GOVERNANCE", "CUSTOM"],
+          "description": "JRC standard or custom contract type"
+        },
+        "jrcStandard": {
+          "type": "string",
+          "enum": ["JRC-20", "JRC-721", "JRC-998", "JRC-CUSTOM"],
+          "description": "Underlying Juvidoe contract standard"
+        },
+        "abi": { "type": "array", "description": "Contract ABI (required for CUSTOM; optional for standard templates)" },
+        "bytecode": { "type": "string", "description": "Deployment bytecode (required for CUSTOM)" },
+        "constructorParams": {
+          "type": "array",
+          "description": "Constructor args; supports {{walletAddress}}, {{routerAddress}}, {{treasuryAddress}}, {{moduleId}} placeholders"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Other contractNames this contract depends on (deployed first)"
+        },
+        "routeThroughJvdEgcr": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether transfers must route through JvdEgcrRouter"
+        }
+      }
+    },
+    "ServiceConfig": {
+      "type": "object",
+      "properties": {
+        "wallet": { "type": "boolean", "default": true },
+        "settlement": { "type": "boolean", "default": true },
+        "conversion": { "type": "boolean", "default": false }
+      }
+    },
+    "ComplianceConfig": {
+      "type": "object",
+      "properties": {
+        "kycRequired": { "type": "boolean", "default": true },
+        "amlRequired": { "type": "boolean", "default": true }
+      }
+    },
+    "SwitchableConfig": {
+      "type": "object",
+      "description": "Per-feature on/off toggles for custom module routes",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "analytics": { "type": "boolean", "default": true },
+        "transactions": { "type": "boolean", "default": true },
+        "compliance": { "type": "boolean", "default": true },
+        "governance": { "type": "boolean", "default": false }
+      }
+    },
+    "EndpointBinding": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string" },
+        "method": { "type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"] },
+        "contractRef": { "type": "string", "description": "contractName this endpoint binds to" },
+        "feature": { "type": "string", "description": "Switchable feature flag key" }
+      }
+    }
+  },
+  "moduleConfig": {
+    "type": "object",
+    "required": ["moduleId", "moduleName", "moduleType", "contracts"],
+    "properties": {
+      "moduleId": { "type": "string" },
+      "moduleName": { "type": "string" },
+      "moduleType": {
+        "type": "string",
+        "description": "Predefined (FUND, TREASURY, ...) or CUSTOM_* for user-invented modules"
+      },
+      "description": { "type": "string" },
+      "contracts": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/ContractDefinition" },
+        "minItems": 1
+      },
+      "services": { "$ref": "#/definitions/ServiceConfig" },
+      "compliance": { "$ref": "#/definitions/ComplianceConfig" },
+      "switchable": { "$ref": "#/definitions/SwitchableConfig" },
+      "uiProperties": {
+        "type": "object",
+        "properties": {
+          "icon": { "type": "string" },
+          "primaryColor": { "type": "string" },
+          "displayName": { "type": "string" }
+        }
+      },
+      "platformIntegrations": {
+        "type": "array",
+        "items": { "type": "string", "enum": ["GRANTS", "PAYMENTS", "SAAS", "CREDIT", "MARKETPLACE"] },
+        "description": "Cross-platform ecosystems this module integrates with"
+      }
+    }
+  },
+  "contractTypeMapping": {
+    "TOKEN": { "template": "JRC20WithJvdRouter", "jrcStandard": "JRC-20", "routeThroughJvdEgcr": true },
+    "NFT": { "template": "JRC721WithJvdRouter", "jrcStandard": "JRC-721", "routeThroughJvdEgcr": true },
+    "BUNDLE": { "template": "JRC721WithJvdRouter", "jrcStandard": "JRC-998", "routeThroughJvdEgcr": true, "note": "JRC-998 composable; uses JRC-721 template until JRC998WithJvdRouter ships" },
+    "TREASURY": { "template": "Treasury", "jrcStandard": null, "routeThroughJvdEgcr": false },
+    "ROUTER": { "template": "Router", "jrcStandard": null, "routeThroughJvdEgcr": false },
+    "GOVERNANCE": { "template": null, "jrcStandard": "JRC-CUSTOM", "routeThroughJvdEgcr": false, "note": "Requires custom ABI/bytecode or external DAO contract" }
+  },
+  "defaultEndpointBindings": {
+    "TOKEN": [
+      { "path": "/gbml/payments/send", "method": "POST", "feature": "transactions" },
+      { "path": "/gbml/wallets/:moduleId/transfer", "method": "POST", "feature": "transactions" },
+      { "path": "/gbml/settlements", "method": "POST", "feature": "transactions" }
+    ],
+    "NFT": [
+      { "path": "/gbml/payments/send", "method": "POST", "feature": "transactions" },
+      { "path": "/gbml/wallets/:moduleId/transfer", "method": "POST", "feature": "transactions" }
+    ],
+    "BUNDLE": [
+      { "path": "/gbml/payments/send", "method": "POST", "feature": "transactions" },
+      { "path": "/gbml/settlements", "method": "POST", "feature": "transactions" }
+    ],
+    "GOVERNANCE": [
+      { "path": "/gbml/blockchain-modules/:moduleId/governance", "method": "GET", "feature": "governance" },
+      { "path": "/gbml/blockchain-modules/:moduleId/governance/proposals", "method": "POST", "feature": "governance" }
+    ],
+    "TREASURY": [
+      { "path": "/gbml/disbursements", "method": "POST", "feature": "transactions" }
+    ]
+  },
+  "predefinedModuleTypes": ["FUND", "TREASURY", "GRANT", "REGISTRY", "PAYMENT", "TOKEN", "NFT", "ROUTER"]
+}

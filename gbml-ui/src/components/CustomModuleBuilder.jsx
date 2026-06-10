@@ -22,7 +22,7 @@ function CustomModuleBuilder({ onSuccess, onCancel }) {
     moduleId: '',
     moduleName: '',
     description: '',
-    moduleType: 'CUSTOM',
+    moduleType: '',
     icon: '🚀',
     primaryColor: '#667eea',
     selectedContracts: [],
@@ -156,15 +156,25 @@ function CustomModuleBuilder({ onSuccess, onCancel }) {
       // Add custom contracts
       contractDefinitions.push(...formData.customContracts);
 
-      // Register the custom module
+      const moduleType = formData.moduleType
+        || `CUSTOM_${formData.moduleId.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`;
+
       const moduleData = {
         moduleId: formData.moduleId,
         moduleName: formData.moduleName,
-        moduleType: formData.moduleType,
+        moduleType,
         description: formData.description,
         contracts: contractDefinitions,
         services: formData.services,
         compliance: formData.compliance,
+        switchable: {
+          enabled: true,
+          analytics: true,
+          transactions: true,
+          compliance: formData.compliance.kycRequired || formData.compliance.amlRequired,
+          governance: formData.selectedContracts.includes('GOVERNANCE')
+        },
+        platformIntegrations: ['PAYMENTS', 'GRANTS'],
         uiProperties: {
           icon: formData.icon,
           primaryColor: formData.primaryColor,
@@ -193,8 +203,11 @@ function CustomModuleBuilder({ onSuccess, onCancel }) {
       const enableData = {
         moduleId: formData.moduleId,
         serviceId: formData.moduleId,
-        moduleType: formData.moduleType,
-        contractDefinitions: contractDefinitions
+        moduleType,
+        contractDefinitions,
+        services: formData.services,
+        compliance: formData.compliance,
+        switchable: moduleData.switchable
       };
 
       await enableCustomModule(enableData);
