@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 import { ethers } from 'ethers';
 import { supabase } from '../config/supabase.js';
 
-const STANDARD_CONTRACT_TYPES = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER', 'GOVERNANCE'];
+const STANDARD_CONTRACT_TYPES = ['TOKEN', 'NFT', 'BUNDLE', 'COMPOSABLE', 'TREASURY', 'ROUTER', 'GOVERNANCE'];
 
 /**
  * Module Registry Service
@@ -234,6 +234,7 @@ export class ModuleRegistryService {
         ];
       case 'NFT':
       case 'BUNDLE':
+      case 'COMPOSABLE':
         return [name, `NFT${safeId}`, routerAddress];
       case 'TREASURY':
         return [walletAddress];
@@ -272,7 +273,7 @@ export class ModuleRegistryService {
       return {
         ...contract,
         constructorParams: constructorParams || [],
-        routeThroughJvdEgcr: contract.routeThroughJvdEgcr !== false && ['TOKEN', 'NFT', 'BUNDLE'].includes(type)
+        routeThroughJvdEgcr: contract.routeThroughJvdEgcr !== false && ['TOKEN', 'NFT', 'BUNDLE', 'COMPOSABLE'].includes(type)
       };
     });
   }

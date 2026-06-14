@@ -9,6 +9,7 @@ const CAPABILITY_MAP = {
   TOKEN: 'hasToken',
   NFT: 'hasNFT',
   BUNDLE: 'hasNFT',
+  COMPOSABLE: 'hasNFT',
   GOVERNANCE: 'hasGovernance',
   TREASURY: 'hasTreasury',
   ROUTER: 'hasRouter'

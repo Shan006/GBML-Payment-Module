@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { globalLimiter, deployLimiter } from "./middleware/rate-limiter.js";
 import paymentsRoutes from "./routes/payments.routes.js";
 import fiatRoutes from "./routes/fiat.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
@@ -13,15 +14,14 @@ import walletsRoutes from "./wallets/wallets.routes.js";
 import { setupCustomModuleRoutes } from "./enablement/module-registry.routes.js";
 import { authenticateApiKey } from "./middleware/api-key.js";
 
-
-
-
-
 const app = express();
+
+// Global rate limiter
+app.use(globalLimiter);
 
 // Middleware
 app.use(cors());
-app.use(authenticateApiKey); // Global API Key authentication
+app.use(authenticateApiKey);
 
 // Special parser for Stripe webhooks (need raw body)
 app.use(express.json({
@@ -46,41 +46,31 @@ app.use("/gbml", disbursementRoutes);
 app.use("/gbml", apiKeyRoutes);
 
 // Contract Registry routes
-// Available as /contracts/* (per spec) and /gbml/contracts/* (for consistency)
 app.use("/contracts", contractsRoutes);
 app.use("/gbml/contracts", contractsRoutes);
 
-// Dynamic Contract Deployment Engine routes
-// Available as /deploy (per spec) and /gbml/deploy (for consistency)
-app.use("/deploy", deploymentRoutes);
-app.use("/gbml/deploy", deploymentRoutes);
+// Dynamic Contract Deployment Engine routes (rate limited)
+app.use("/deploy", deployLimiter, deploymentRoutes);
+app.use("/gbml/deploy", deployLimiter, deploymentRoutes);
 
-// Blockchain Enablement Service routes
-// Available as /enable-blockchain (per spec) and /gbml/enable-blockchain (for consistency)
-app.use("/enable-blockchain", enablementRoutes);
-app.use("/gbml/enable-blockchain", enablementRoutes);
+// Blockchain Enablement Service routes (rate limited)
+app.use("/enable-blockchain", deployLimiter, enablementRoutes);
+app.use("/gbml/enable-blockchain", deployLimiter, enablementRoutes);
 
 // Blockchain Modules Management routes
-// Available as /blockchain-modules and /gbml/blockchain-modules
 app.use("/blockchain-modules", enablementRoutes);
 app.use("/gbml/blockchain-modules", enablementRoutes);
 
 // JVD Router / Settlement Layer routes
-// Available as /settlements (per spec) and /gbml/settlements (for consistency)
 app.use("/settlements", settlementsRoutes);
 app.use("/gbml/settlements", settlementsRoutes);
 
 // Wallet Module routes
-// Available as /wallets (per spec) and /gbml/wallets (for consistency)
 app.use("/wallets", walletsRoutes);
 app.use("/gbml/wallets", walletsRoutes);
 
 // Custom Module Registry routes
-// Available as /custom-modules and /gbml/custom-modules
-setupCustomModuleRoutes(app);
-
-
-
+setupCustomModuleRoutes(app, deployLimiter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -97,4 +87,3 @@ app.use((req, res) => {
 });
 
 export default app;
-

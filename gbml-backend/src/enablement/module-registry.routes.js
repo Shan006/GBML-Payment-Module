@@ -1,27 +1,18 @@
 import { registerCustomModule, getCustomModule, listCustomModules, updateCustomModule, disableCustomModule } from './module-registry.controller.js';
 
-/**
- * Custom Module Registry Routes
- * Handles registration and management of custom module definitions
- */
-export function setupCustomModuleRoutes(app) {
-  // Register a new custom module definition
-  app.post('/custom-modules', registerCustomModule);
-  app.post('/gbml/custom-modules', registerCustomModule);
+export function setupCustomModuleRoutes(app, writeLimiter) {
+  app.post('/custom-modules', writeLimiter, registerCustomModule);
+  app.post('/gbml/custom-modules', writeLimiter, registerCustomModule);
 
-  // Get a specific custom module definition
   app.get('/custom-modules/:moduleId', getCustomModule);
   app.get('/gbml/custom-modules/:moduleId', getCustomModule);
 
-  // List all custom modules (with optional filters)
   app.get('/custom-modules', listCustomModules);
   app.get('/gbml/custom-modules', listCustomModules);
 
-  // Update a custom module definition
-  app.put('/custom-modules/:moduleId', updateCustomModule);
-  app.put('/gbml/custom-modules/:moduleId', updateCustomModule);
+  app.put('/custom-modules/:moduleId', writeLimiter, updateCustomModule);
+  app.put('/gbml/custom-modules/:moduleId', writeLimiter, updateCustomModule);
 
-  // Disable a custom module definition
   app.delete('/custom-modules/:moduleId', disableCustomModule);
   app.delete('/gbml/custom-modules/:moduleId', disableCustomModule);
 }

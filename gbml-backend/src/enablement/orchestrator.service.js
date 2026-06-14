@@ -11,6 +11,7 @@ import { ModuleRegistryService } from './module-registry.service.js';
 import { moduleBindingService } from './module-binding.service.js';
 import { complianceService } from './compliance.service.js';
 import { config } from '../config/env.js';
+import { detectWalletAnomalies, logSuspiciousActivity } from '../services/fraud-detector.service.js';
 
 /**
  * Orchestrator Service
@@ -35,6 +36,7 @@ export class OrchestratorService {
     PAYMENT: 'TOKEN',
     TOKEN: 'TOKEN',
     NFT: 'NFT',
+    COMPOSABLE: 'NFT',
     ROUTER: 'ROUTER'
   };
 
@@ -47,6 +49,19 @@ export class OrchestratorService {
     console.log(`[Orchestrator] Starting blockchain enablement for module ${moduleId} of type ${moduleType}`);
 
     try {
+      // Fraud detection check
+      const fraudCheck = await detectWalletAnomalies(moduleId, identity);
+      if (!fraudCheck.isClean) {
+        await logSuspiciousActivity({
+          walletAddress: moduleId,
+          moduleType,
+          action: 'BLOCKCHAIN_ENABLE',
+          flags: fraudCheck.flags,
+          riskLevel: fraudCheck.risk
+        });
+        console.warn(`[Orchestrator] Fraud flags for ${moduleId}:`, fraudCheck.flags);
+      }
+
       // Check if this is a custom module
       const isCustomModule = moduleType && moduleType.startsWith('CUSTOM_');
       
@@ -316,8 +331,9 @@ export class OrchestratorService {
         };
       case 'JRC721':
       case 'NFT':
+      case 'COMPOSABLE':
         return {
-          constructorParams: [`Module NFT ${moduleId}`, `NFT${safeId}`, jvdRouterAddress] // Router address injected for JRC721WithJvdRouter
+          constructorParams: [`Module NFT ${moduleId}`, `NFT${safeId}`, jvdRouterAddress] // Router address injected for JRC721WithJvdRouter / JRC998WithJvdRouter
         };
       case 'ROUTER':
         return {

@@ -15,7 +15,7 @@ export class DeployContractDto {
   static validate(data) {
     const errors = [];
 
-    const validTypes = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER', 'GOVERNANCE', 'JVD_ROUTER'];
+    const validTypes = ['TOKEN', 'NFT', 'BUNDLE', 'COMPOSABLE', 'TREASURY', 'ROUTER', 'GOVERNANCE', 'JVD_ROUTER'];
     if (!data.contractType || !validTypes.includes(data.contractType.toUpperCase())) {
       errors.push(`contractType is required and must be one of: ${validTypes.join(', ')}`);
     }

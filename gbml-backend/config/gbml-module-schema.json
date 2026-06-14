@@ -111,6 +111,7 @@
     "TOKEN": { "template": "JRC20WithJvdRouter", "jrcStandard": "JRC-20", "routeThroughJvdEgcr": true },
     "NFT": { "template": "JRC721WithJvdRouter", "jrcStandard": "JRC-721", "routeThroughJvdEgcr": true },
     "BUNDLE": { "template": "JRC721WithJvdRouter", "jrcStandard": "JRC-998", "routeThroughJvdEgcr": true, "note": "JRC-998 composable; uses JRC-721 template until JRC998WithJvdRouter ships" },
+    "COMPOSABLE": { "template": "JRC998WithJvdRouter", "jrcStandard": "JRC-998", "routeThroughJvdEgcr": true },
     "TREASURY": { "template": "Treasury", "jrcStandard": null, "routeThroughJvdEgcr": false },
     "ROUTER": { "template": "Router", "jrcStandard": null, "routeThroughJvdEgcr": false },
     "GOVERNANCE": { "template": null, "jrcStandard": "JRC-CUSTOM", "routeThroughJvdEgcr": false, "note": "Requires custom ABI/bytecode or external DAO contract" }
@@ -128,6 +129,11 @@
     "BUNDLE": [
       { "path": "/gbml/payments/send", "method": "POST", "feature": "transactions" },
       { "path": "/gbml/settlements", "method": "POST", "feature": "transactions" }
+    ],
+    "COMPOSABLE": [
+      { "path": "/gbml/payments/send", "method": "POST", "feature": "transactions" },
+      { "path": "/gbml/settlements", "method": "POST", "feature": "transactions" },
+      { "path": "/gbml/wallets/:moduleId/transfer", "method": "POST", "feature": "transactions" }
     ],
     "GOVERNANCE": [
       { "path": "/gbml/blockchain-modules/:moduleId/governance", "method": "GET", "feature": "governance" },

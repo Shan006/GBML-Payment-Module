@@ -6,6 +6,7 @@ const CONTRACTS = {
   TOKEN: 'JRC20WithJvdRouter',
   NFT: 'JRC721WithJvdRouter',
   BUNDLE: 'JRC721WithJvdRouter',
+  COMPOSABLE: 'JRC998WithJvdRouter',
   TREASURY: 'Treasury',
   ROUTER: 'Router',
   GOVERNANCE: 'Governance',

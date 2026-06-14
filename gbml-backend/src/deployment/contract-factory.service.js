@@ -8,6 +8,7 @@ const CONTRACTS = {
   TOKEN: 'JRC20WithJvdRouter',
   NFT: 'JRC721WithJvdRouter',
   BUNDLE: 'JRC721WithJvdRouter',
+  COMPOSABLE: 'JRC998WithJvdRouter',
   TREASURY: 'Treasury',
   ROUTER: 'Router',
   GOVERNANCE: 'Governance',
@@ -132,7 +133,7 @@ export class ContractFactoryService {
         
         // Determine if this is a standard contract type or custom
         const type = contractDef.contractType?.toUpperCase();
-        const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER', 'GOVERNANCE', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT'];
+        const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'COMPOSABLE', 'TREASURY', 'ROUTER', 'GOVERNANCE', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT'];
         const isStandardType = artifactBackedTypes.includes(type);
         
         let artifact;

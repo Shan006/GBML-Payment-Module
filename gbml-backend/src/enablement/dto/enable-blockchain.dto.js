@@ -30,7 +30,7 @@ export class EnableBlockchainDto {
     }
 
     // Support both predefined and custom module types
-    const predefinedTypes = ['TOKEN', 'NFT', 'TREASURY', 'ROUTER', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT'];
+    const predefinedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'COMPOSABLE', 'TREASURY', 'ROUTER', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT'];
     if (!data.moduleType || typeof data.moduleType !== 'string' || data.moduleType.trim() === '') {
       errors.push('moduleType is required and must be a non-empty string');
     } else if (!predefinedTypes.includes(data.moduleType.toUpperCase()) && !data.moduleType.startsWith('CUSTOM_')) {
@@ -61,7 +61,7 @@ export class EnableBlockchainDto {
           // For standard contract types (TOKEN, NFT, etc.), ABI and bytecode can be empty
           // as they will be loaded from standard templates
           // For CUSTOM contract type, ABI and bytecode are required
-          const standardContractTypes = ['TOKEN', 'NFT', 'TREASURY', 'ROUTER', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT', 'BUNDLE', 'GOVERNANCE'];
+          const standardContractTypes = ['TOKEN', 'NFT', 'TREASURY', 'ROUTER', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT', 'BUNDLE', 'COMPOSABLE', 'GOVERNANCE'];
           const isStandardType = standardContractTypes.includes(contract.contractType?.toUpperCase());
           
           if (!isStandardType) {
