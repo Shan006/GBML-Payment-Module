@@ -8,6 +8,7 @@ const CONTRACTS = {
   BUNDLE: 'JRC721WithJvdRouter',
   TREASURY: 'Treasury',
   ROUTER: 'Router',
+  GOVERNANCE: 'Governance',
   JVD_ROUTER: 'JvdEgcrRouter'
 };
 

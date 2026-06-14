@@ -146,7 +146,7 @@ export class OrchestratorService {
       });
 
       // Step 5: Enable platform services (wallet, settlement, conversion)
-      const services = await this.attachPlatformServices(moduleId, moduleType);
+      const platformServices = await this.attachPlatformServices(moduleId, moduleType);
 
       // Step 6: Compliance hooks — KYC/AML binding for on-chain interactions
       const complianceResult = await complianceService.bindComplianceHooks({
@@ -164,7 +164,7 @@ export class OrchestratorService {
         moduleType,
         contractAddress: deployment.contractAddress,
         deploymentTxHash: deployment.txHash,
-        ...services
+        ...platformServices
       });
 
       // Step 8: Bind endpoints and sync dashboard.json
@@ -178,9 +178,9 @@ export class OrchestratorService {
           txHash: deployment.txHash
         }],
         services: {
-          wallet: services?.walletEnabled ?? true,
-          settlement: services?.settlementEnabled ?? services?.settlement ?? true,
-          conversion: services?.conversionEnabled ?? services?.conversion ?? false
+          wallet: platformServices?.walletEnabled ?? true,
+          settlement: platformServices?.settlementEnabled ?? platformServices?.settlement ?? true,
+          conversion: platformServices?.conversionEnabled ?? platformServices?.conversion ?? false
         },
         compliance: { kycRequired: true, amlRequired: true },
         walletAddress,
@@ -196,7 +196,7 @@ export class OrchestratorService {
         deploymentTxHash: deployment.txHash,
         walletAddress,
         jvdRouterAddress,
-        services: enablementRecord.toResponse().services,
+        services: platformServices,
         kycEnabled
       }, identity);
 
@@ -217,15 +217,23 @@ export class OrchestratorService {
       console.error(`[Orchestrator] Error enabling blockchain for module ${moduleId}:`, error);
 
       try {
-        await this.enablementRepository.save({
-          id: uuid(),
-          moduleId,
-          serviceId: moduleId,
-          moduleType,
-          contractAddress: '0x0000000000000000000000000000000000000000',
-          status: 'FAILED',
-          blockchainEnabled: false
-        });
+        const existing = await this.enablementRepository.findByModuleId(moduleId);
+        if (!existing) {
+          await this.enablementRepository.save({
+            id: uuid(),
+            moduleId,
+            serviceId: moduleId,
+            moduleType,
+            contractAddress: `0x0000000000000000000000000000000000000000`, // placeholder; avoid duplicate by checking existence first
+            status: 'FAILED',
+            blockchainEnabled: false
+          });
+        } else {
+          await this.enablementRepository.update(moduleId, {
+            status: 'FAILED',
+            blockchainEnabled: false
+          });
+        }
       } catch (saveError) {
         console.error('[Orchestrator] Failed to save error status:', saveError);
       }
@@ -312,6 +320,10 @@ export class OrchestratorService {
           constructorParams: [`Module NFT ${moduleId}`, `NFT${safeId}`, jvdRouterAddress] // Router address injected for JRC721WithJvdRouter
         };
       case 'ROUTER':
+        return {
+          constructorParams: [walletAddress]
+        };
+      case 'GOVERNANCE':
         return {
           constructorParams: [walletAddress]
         };

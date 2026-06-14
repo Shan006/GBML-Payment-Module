@@ -26,7 +26,7 @@ export class CreateContractDto {
       errors.push('contractName is required and must be a non-empty string');
     }
 
-    const validTypes = ['TOKEN', 'NFT', 'TREASURY', 'ROUTER', 'CUSTOM', 'JVD_ROUTER'];
+    const validTypes = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER', 'GOVERNANCE', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT', 'CUSTOM', 'JVD_ROUTER'];
     if (!data.contractType || !validTypes.includes(data.contractType.toUpperCase())) {
       errors.push(`contractType is required and must be one of: ${validTypes.join(', ')}`);
     }

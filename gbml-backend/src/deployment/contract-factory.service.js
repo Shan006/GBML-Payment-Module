@@ -10,6 +10,7 @@ const CONTRACTS = {
   BUNDLE: 'JRC721WithJvdRouter',
   TREASURY: 'Treasury',
   ROUTER: 'Router',
+  GOVERNANCE: 'Governance',
   JVD_ROUTER: 'JvdEgcrRouter'
 };
 
@@ -40,7 +41,14 @@ export class ContractFactoryService {
 
     try {
       const data = await fs.promises.readFile(artifactPath, 'utf8');
-      return JSON.parse(data);
+      const artifact = JSON.parse(data);
+      console.log(`[ContractFactoryService] Loaded artifact for ${contractType} (${contractName}):`, {
+        hasAbi: !!artifact.abi,
+        abiLength: artifact.abi?.length || 0,
+        hasBytecode: !!artifact.bytecode,
+        bytecodeLength: artifact.bytecode?.length || 0
+      });
+      return artifact;
     } catch (err) {
       console.error(`Failed to load artifact at path: ${artifactPath}`, err);
       throw new Error(`Compiled artifact for contract type ${contractType} (${contractName}) not found. Please ensure 'npx hardhat compile' has run successfully.`);
@@ -69,7 +77,44 @@ export class ContractFactoryService {
    * @returns {ethers.ContractFactory}
    */
   getContractFactory(artifact) {
-    return new ethers.ContractFactory(artifact.abi, artifact.bytecode, this.wallet);
+    // Ensure ABI is an array and bytecode is a string
+    const abi = Array.isArray(artifact.abi) ? artifact.abi : [];
+    // Use deployedBytecode if bytecode is empty, as ethers.js v6 sometimes requires it
+    const bytecode = (typeof artifact.bytecode === 'string' && artifact.bytecode) 
+      ? artifact.bytecode 
+      : (artifact.deployedBytecode || '');
+    
+    // Log for debugging
+    console.log('[ContractFactoryService] Creating ContractFactory with ABI length:', abi.length, 'bytecode length:', bytecode.length);
+    
+    try {
+      // Try standard ContractFactory creation
+      return new ethers.ContractFactory(abi, bytecode, this.wallet);
+    } catch (error) {
+      console.error('[ContractFactoryService] ContractFactory creation failed:', error.message);
+      console.error('[ContractFactoryService] Error stack:', error.stack);
+      
+      // Try with Interface constructor as alternative
+      try {
+        const iface = new ethers.Interface(abi);
+        return new ethers.ContractFactory(iface, bytecode, this.wallet);
+      } catch (ifaceError) {
+        console.error('[ContractFactoryService] Interface creation also failed:', ifaceError.message);
+        console.error('[ContractFactoryService] Interface error stack:', ifaceError.stack);
+        
+        // Last resort: try with minimal ABI (constructor only)
+        try {
+          const minimalAbi = abi.filter(item => item.type === 'constructor');
+          console.log('[ContractFactoryService] Trying minimal ABI with', minimalAbi.length, 'entries');
+          const minimalIface = new ethers.Interface(minimalAbi);
+          return new ethers.ContractFactory(minimalIface, bytecode, this.wallet);
+        } catch (minimalError) {
+          console.error('[ContractFactoryService] Minimal ABI also failed:', minimalError.message);
+          console.error('[ContractFactoryService] Minimal error stack:', minimalError.stack);
+          throw new Error(`Failed to create contract factory: ${error.message}`);
+        }
+      }
+    }
   }
 
   /**
@@ -87,7 +132,7 @@ export class ContractFactoryService {
         
         // Determine if this is a standard contract type or custom
         const type = contractDef.contractType?.toUpperCase();
-        const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT'];
+        const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER', 'GOVERNANCE', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT'];
         const isStandardType = artifactBackedTypes.includes(type);
         
         let artifact;
@@ -95,7 +140,7 @@ export class ContractFactoryService {
         if (isStandardType) {
           // Load from standard artifact templates
           console.log(`[ContractFactoryService] Loading standard artifact for ${contractDef.contractType}`);
-          artifact = this.loadArtifact(contractDef.contractType);
+          artifact = await this.loadArtifact(contractDef.contractType);
         } else {
           // Load from custom definition
           console.log(`[ContractFactoryService] Loading custom artifact for ${contractDef.contractName}`);

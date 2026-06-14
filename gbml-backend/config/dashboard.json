@@ -53,6 +53,283 @@
       "walletAddress": "0x9581bcf920d11cfab08377221abcf6a3456fa51b",
       "jvdRouterAddress": "0xbf3902ea819ecd136e407d29cf9c6bf1f08ae512",
       "updatedAt": "2026-06-04T19:52:57.610Z"
+    },
+    {
+      "moduleId": "ipsamvelduisauto",
+      "contractType": "CUSTOM_IPSAMVELDUISAUTO",
+      "contractAddress": "0x1220Bc3c83B60BaA2adde252dF1BbE0c2C814b6B",
+      "enabled": true,
+      "walletAddress": "0x12603dc9e343875d29b5884019cd358ca278a151",
+      "jvdRouterAddress": "0xbf3902ea819ecd136e407d29cf9c6bf1f08ae512",
+      "isCustom": true,
+      "moduleName": "ipsamvelduisauto",
+      "contracts": [
+        {
+          "contractName": "ipsamvelduisauto_governance",
+          "contractType": "GOVERNANCE",
+          "contractAddress": "0x1220Bc3c83B60BaA2adde252dF1BbE0c2C814b6B",
+          "txHash": "0xe54814b7dd4724d9d07e2304ced79c204f96f649b6afd48a6e1b240cd2f0d124"
+        }
+      ],
+      "services": {
+        "wallet": true,
+        "settlement": true,
+        "conversion": false
+      },
+      "compliance": {
+        "kycRequired": true,
+        "amlRequired": true
+      },
+      "switchable": {
+        "enabled": true,
+        "analytics": true,
+        "transactions": true,
+        "compliance": true,
+        "governance": true
+      },
+      "capabilities": {
+        "hasToken": false,
+        "hasNFT": false,
+        "hasGovernance": true,
+        "hasAnalytics": true,
+        "hasCompliance": true,
+        "hasTreasury": false,
+        "hasRouter": false
+      },
+      "endpoints": [
+        {
+          "path": "/gbml/blockchain-modules/ipsamvelduisauto/governance",
+          "method": "GET",
+          "contractRef": "ipsamvelduisauto_governance",
+          "contractAddress": "0x1220Bc3c83B60BaA2adde252dF1BbE0c2C814b6B",
+          "contractType": "GOVERNANCE",
+          "feature": "governance",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/blockchain-modules/ipsamvelduisauto/governance/proposals",
+          "method": "POST",
+          "contractRef": "ipsamvelduisauto_governance",
+          "contractAddress": "0x1220Bc3c83B60BaA2adde252dF1BbE0c2C814b6B",
+          "contractType": "GOVERNANCE",
+          "feature": "governance",
+          "enabled": true
+        }
+      ],
+      "platformIntegrations": [],
+      "uiProperties": {},
+      "boundAt": "2026-06-14T07:55:14.403Z",
+      "updatedAt": "2026-06-14T07:55:14.407Z"
+    },
+    {
+      "moduleId": "etetsitquiirure",
+      "contractType": "CUSTOM_ETETSITQUIIRURE",
+      "contractAddress": "0xb21c9abC1b68C850Fa4CffAb591C4953F759c286",
+      "enabled": true,
+      "walletAddress": "0x3439001284a06290e3f976f90ebad4d10842992e",
+      "jvdRouterAddress": "0xbf3902ea819ecd136e407d29cf9c6bf1f08ae512",
+      "isCustom": true,
+      "moduleName": "etetsitquiirure",
+      "contracts": [
+        {
+          "contractName": "etetsitquiirure_nft",
+          "contractType": "NFT",
+          "contractAddress": "0xb21c9abC1b68C850Fa4CffAb591C4953F759c286",
+          "txHash": "0x17b178ee70341dba47f029962aba44fd959cbe50442604f7b04d18839c2ba5ef"
+        }
+      ],
+      "services": {
+        "wallet": true,
+        "settlement": true,
+        "conversion": false
+      },
+      "compliance": {
+        "kycRequired": true,
+        "amlRequired": true
+      },
+      "switchable": {
+        "enabled": true,
+        "analytics": true,
+        "transactions": true,
+        "compliance": true,
+        "governance": false
+      },
+      "capabilities": {
+        "hasToken": false,
+        "hasNFT": true,
+        "hasGovernance": false,
+        "hasAnalytics": true,
+        "hasCompliance": true,
+        "hasTreasury": false,
+        "hasRouter": false
+      },
+      "endpoints": [
+        {
+          "path": "/gbml/payments/send",
+          "method": "POST",
+          "contractRef": "etetsitquiirure_nft",
+          "contractAddress": "0xb21c9abC1b68C850Fa4CffAb591C4953F759c286",
+          "contractType": "NFT",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/wallets/etetsitquiirure/transfer",
+          "method": "POST",
+          "contractRef": "etetsitquiirure_nft",
+          "contractAddress": "0xb21c9abC1b68C850Fa4CffAb591C4953F759c286",
+          "contractType": "NFT",
+          "feature": "transactions",
+          "enabled": true
+        }
+      ],
+      "platformIntegrations": [],
+      "uiProperties": {},
+      "boundAt": "2026-06-14T08:13:16.125Z",
+      "updatedAt": "2026-06-14T08:13:16.129Z"
+    },
+    {
+      "moduleId": "harumillosimilique",
+      "contractType": "CUSTOM_HARUMILLOSIMILIQUE",
+      "contractAddress": "0x5e61324760F927f2C432f16d77EfB1DEB187F0cC",
+      "enabled": true,
+      "walletAddress": "0x42fd5338b45e5efe242b756aa649be9813a88ea8",
+      "jvdRouterAddress": "0xbf3902ea819ecd136e407d29cf9c6bf1f08ae512",
+      "isCustom": true,
+      "moduleName": "harumillosimilique",
+      "contracts": [
+        {
+          "contractName": "harumillosimilique_token",
+          "contractType": "TOKEN",
+          "contractAddress": "0x5e61324760F927f2C432f16d77EfB1DEB187F0cC",
+          "txHash": "0xe880cecaa91230bbd2533c9e4c2cdbdc1c2e4224a3b937c3167dd94e6781274b"
+        }
+      ],
+      "services": {
+        "wallet": true,
+        "settlement": true,
+        "conversion": false
+      },
+      "compliance": {
+        "kycRequired": true,
+        "amlRequired": true
+      },
+      "switchable": {
+        "enabled": true,
+        "analytics": true,
+        "transactions": true,
+        "compliance": true,
+        "governance": false
+      },
+      "capabilities": {
+        "hasToken": true,
+        "hasNFT": false,
+        "hasGovernance": false,
+        "hasAnalytics": true,
+        "hasCompliance": true,
+        "hasTreasury": false,
+        "hasRouter": false
+      },
+      "endpoints": [
+        {
+          "path": "/gbml/payments/send",
+          "method": "POST",
+          "contractRef": "harumillosimilique_token",
+          "contractAddress": "0x5e61324760F927f2C432f16d77EfB1DEB187F0cC",
+          "contractType": "TOKEN",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/wallets/harumillosimilique/transfer",
+          "method": "POST",
+          "contractRef": "harumillosimilique_token",
+          "contractAddress": "0x5e61324760F927f2C432f16d77EfB1DEB187F0cC",
+          "contractType": "TOKEN",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/settlements",
+          "method": "POST",
+          "contractRef": "harumillosimilique_token",
+          "contractAddress": "0x5e61324760F927f2C432f16d77EfB1DEB187F0cC",
+          "contractType": "TOKEN",
+          "feature": "transactions",
+          "enabled": true
+        }
+      ],
+      "platformIntegrations": [],
+      "uiProperties": {},
+      "boundAt": "2026-06-14T08:13:42.726Z",
+      "updatedAt": "2026-06-14T08:13:42.728Z"
+    },
+    {
+      "moduleId": "distinctioidaperi",
+      "contractType": "CUSTOM_DISTINCTIOIDAPERI",
+      "contractAddress": "0x20f66d0eEAb28a97268711D66A61e9FEAA37F6fc",
+      "enabled": true,
+      "walletAddress": "0xcdce6565f571676b35b90797f4aa541209f1103d",
+      "jvdRouterAddress": "0xbf3902ea819ecd136e407d29cf9c6bf1f08ae512",
+      "isCustom": true,
+      "moduleName": "distinctioidaperi",
+      "contracts": [
+        {
+          "contractName": "distinctioidaperi_bundle",
+          "contractType": "BUNDLE",
+          "contractAddress": "0x20f66d0eEAb28a97268711D66A61e9FEAA37F6fc",
+          "txHash": "0x3b9ccce8e47be4ac2972234f6e9b7afd8f5209e162686206596cfa795bffcd94"
+        }
+      ],
+      "services": {
+        "wallet": true,
+        "settlement": true,
+        "conversion": false
+      },
+      "compliance": {
+        "kycRequired": true,
+        "amlRequired": true
+      },
+      "switchable": {
+        "enabled": true,
+        "analytics": true,
+        "transactions": true,
+        "compliance": true,
+        "governance": false
+      },
+      "capabilities": {
+        "hasToken": false,
+        "hasNFT": true,
+        "hasGovernance": false,
+        "hasAnalytics": true,
+        "hasCompliance": true,
+        "hasTreasury": false,
+        "hasRouter": false
+      },
+      "endpoints": [
+        {
+          "path": "/gbml/payments/send",
+          "method": "POST",
+          "contractRef": "distinctioidaperi_bundle",
+          "contractAddress": "0x20f66d0eEAb28a97268711D66A61e9FEAA37F6fc",
+          "contractType": "BUNDLE",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/settlements",
+          "method": "POST",
+          "contractRef": "distinctioidaperi_bundle",
+          "contractAddress": "0x20f66d0eEAb28a97268711D66A61e9FEAA37F6fc",
+          "contractType": "BUNDLE",
+          "feature": "transactions",
+          "enabled": true
+        }
+      ],
+      "platformIntegrations": [],
+      "uiProperties": {},
+      "boundAt": "2026-06-14T08:14:08.396Z",
+      "updatedAt": "2026-06-14T08:14:08.397Z"
     }
   ]
 }

@@ -746,6 +746,42 @@
         "IERC20",
         "JvdEgcrRouter"
       ]
+    },
+    "D:\\Shayan\\Projects\\FREELANCE\\Juvidoe Projects\\Payment GB\\gbml-backend\\contracts\\Governance.sol": {
+      "lastModificationDate": 1781422438832,
+      "contentHash": "31778a37cb7efa0fe801f546965ff736",
+      "sourceName": "contracts/Governance.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Governance"
+      ]
     }
   }
 }

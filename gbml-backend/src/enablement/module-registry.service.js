@@ -39,7 +39,7 @@ export class ModuleRegistryService {
       throw new Error('At least one contract must be defined for a custom module');
     }
 
-    const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER'];
+    const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER', 'GOVERNANCE'];
 
     for (const contract of contracts) {
       if (!contract.contractName || !contract.contractType) {
@@ -239,6 +239,8 @@ export class ModuleRegistryService {
         return [walletAddress];
       case 'ROUTER':
         return [walletAddress];
+      case 'GOVERNANCE':
+        return [walletAddress];
       default:
         return [];
     }
@@ -250,11 +252,11 @@ export class ModuleRegistryService {
   enrichContractDefinitions(contracts, context = {}) {
     return contracts.map((contract) => {
       const type = contract.contractType?.toUpperCase();
-      const isStandard = STANDARD_CONTRACT_TYPES.includes(type) && type !== 'GOVERNANCE';
+      const isStandard = STANDARD_CONTRACT_TYPES.includes(type);
 
       let constructorParams = contract.constructorParams;
-      if ((!constructorParams || constructorParams.length === 0) && isStandard) {
-        constructorParams = this.buildConstructorParams(type, {
+      if (isStandard) {
+        const expectedParams = this.buildConstructorParams(type, {
           moduleId: context.moduleId,
           contractName: contract.contractName,
           walletAddress: context.walletAddress || '{{walletAddress}}',
@@ -262,6 +264,9 @@ export class ModuleRegistryService {
         }).map((param) =>
           typeof param === 'string' ? param : param.toString()
         );
+        if (!constructorParams || constructorParams.length !== expectedParams.length) {
+          constructorParams = expectedParams;
+        }
       }
 
       return {
