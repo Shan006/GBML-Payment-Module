@@ -467,6 +467,91 @@ export class OrchestratorService {
   }
 
   /**
+   * Deploy additional contracts to an already-enabled custom module
+   * @param {Object} request - { moduleId, contractDefinitions }
+   * @returns {Promise<Object>} Deployment result
+   */
+  async deployAdditionalContracts({ moduleId, contractDefinitions }) {
+    const existing = await this.enablementRepository.findByModuleId(moduleId);
+    if (!existing || !existing.blockchainEnabled || existing.status !== 'ACTIVE') {
+      throw new Error(`Module ${moduleId} is not enabled. Enable it first before adding contracts.`);
+    }
+
+    if (!contractDefinitions?.length) {
+      throw new Error('contractDefinitions is required');
+    }
+
+    const jvdRouterAddress = await this.routerService.checkAndDeployRouter();
+    if (!jvdRouterAddress) {
+      throw new Error('JVD Router is required but could not be deployed or resolved');
+    }
+
+    const { walletAddress } = await this.walletService.createOrGetModuleWallet(moduleId);
+    console.log(`[Orchestrator] Deploying ${contractDefinitions.length} additional contracts for module ${moduleId}`);
+
+    const enrichedDefinitions = this.moduleRegistryService.enrichContractDefinitions(
+      contractDefinitions,
+      { moduleId, walletAddress, routerAddress: jvdRouterAddress }
+    );
+
+    const sharedParams = {
+      walletAddress,
+      routerAddress: jvdRouterAddress,
+      moduleId,
+      treasuryAddress: config.treasuryAddress || walletAddress
+    };
+
+    const deployments = await this.deploymentService.deployCustomContracts(
+      enrichedDefinitions,
+      sharedParams
+    );
+
+    console.log(`[Orchestrator] ${deployments.length} additional contracts deployed successfully`);
+
+    const existingBinding = moduleBindingService.getBindings(moduleId);
+    const allDeployments = existingBinding?.contracts
+      ? [...existingBinding.contracts, ...deployments]
+      : deployments;
+
+    const binding = await moduleBindingService.bindModule({
+      moduleId,
+      moduleType: existing.moduleType,
+      deployments: allDeployments,
+      services: {
+        wallet: existing.walletEnabled ?? true,
+        settlement: existing.settlementEnabled ?? true,
+        conversion: existing.conversionEnabled ?? false
+      },
+      compliance: {},
+      switchable: existingBinding?.switchable || {},
+      walletAddress,
+      jvdRouterAddress,
+      uiProperties: existingBinding?.uiProperties || {},
+      platformIntegrations: existingBinding?.platformIntegrations || []
+    }, {});
+
+    await syncModuleToDashboard({
+      moduleId,
+      contractType: existing.moduleType,
+      contractAddress: deployments[0]?.contractAddress,
+      enabled: true,
+      walletAddress,
+      jvdRouterAddress,
+      ...binding
+    });
+
+    return {
+      success: true,
+      moduleId,
+      moduleType: existing.moduleType,
+      deployments,
+      walletAddress,
+      jvdRouterAddress,
+      bindings: binding
+    };
+  }
+
+  /**
    * Enable a custom module with dynamic contract composition
    * @param {Object} request - Custom module enablement request
    * @returns {Promise<Object>} Enablement result

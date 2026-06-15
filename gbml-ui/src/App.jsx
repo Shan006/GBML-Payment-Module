@@ -12,6 +12,7 @@ import BlockchainModules from './components/BlockchainModules'
 import DynamicNavigation from './components/DynamicNavigation'
 import DynamicDashboard from './components/DynamicDashboard'
 import CustomModuleBuilder from './components/CustomModuleBuilder'
+import AddContractsToModule from './components/AddContractsToModule'
 import { supabase } from './supabase'
 import axios from 'axios'
 import './App.css'
@@ -23,6 +24,7 @@ function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [activeTab, setActiveTab] = useState('standard')
   const [showCustomModuleBuilder, setShowCustomModuleBuilder] = useState(false)
+  const [showAddContracts, setShowAddContracts] = useState(false)
   const [selectedDynamicModule, setSelectedDynamicModule] = useState(null)
 
   useEffect(() => {
@@ -93,6 +95,11 @@ function App() {
 
   const handleCustomModuleCreated = () => {
     setShowCustomModuleBuilder(false)
+    setRefreshTrigger(prev => prev + 1)
+  }
+
+  const handleContractsAdded = () => {
+    setShowAddContracts(false)
     setRefreshTrigger(prev => prev + 1)
   }
 
@@ -302,22 +309,40 @@ function App() {
                     </p>
                   </div>
                   {role === 'admin' && (
-                    <button
-                      onClick={() => setShowCustomModuleBuilder(true)}
-                      style={{
-                        padding: '1rem 2rem',
-                        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        fontSize: '1rem',
-                        fontWeight: 600,
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                      }}
-                    >
-                      + Create Custom Module
-                    </button>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                      <button
+                        onClick={() => setShowAddContracts(true)}
+                        style={{
+                          padding: '1rem 2rem',
+                          background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                        }}
+                      >
+                        + Add Contracts
+                      </button>
+                      <button
+                        onClick={() => setShowCustomModuleBuilder(true)}
+                        style={{
+                          padding: '1rem 2rem',
+                          background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                        }}
+                      >
+                        + Create Custom Module
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -336,6 +361,35 @@ function App() {
           </div>
         )}
       </main>
+
+      {/* Add Contracts Modal Overlay */}
+      {showAddContracts && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '2rem',
+          overflow: 'auto'
+        }}>
+          <div style={{
+            maxWidth: '100%',
+            maxHeight: '100%',
+            overflow: 'auto'
+          }}>
+            <AddContractsToModule
+              onSuccess={handleContractsAdded}
+              onCancel={() => setShowAddContracts(false)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Custom Module Builder Modal Overlay */}
       {showCustomModuleBuilder && (

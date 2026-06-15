@@ -215,6 +215,66 @@ export class ModuleRegistryService {
   }
 
   /**
+   * Add new contracts to an existing custom module
+   * Merges new contracts with existing ones (appends to the contracts array)
+   * @param {string} moduleId - Module ID
+   * @param {Array} newContracts - Array of contract definitions to add
+   * @returns {Promise<Object>} Updated module
+   */
+  async addContractsToModule(moduleId, newContracts) {
+    if (!newContracts || newContracts.length === 0) {
+      throw new Error('At least one contract must be provided');
+    }
+
+    const existingModule = await this.getModule(moduleId);
+    if (!existingModule) {
+      throw new Error(`Custom module not found: ${moduleId}`);
+    }
+
+    const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER', 'GOVERNANCE'];
+
+    for (const contract of newContracts) {
+      if (!contract.contractName || !contract.contractType) {
+        throw new Error('Each contract must have contractName and contractType');
+      }
+
+      const isArtifactBacked = artifactBackedTypes.includes(contract.contractType?.toUpperCase());
+      if (!isArtifactBacked && (!contract.abi || !contract.bytecode)) {
+        throw new Error(`Contract ${contract.contractName} (${contract.contractType}) requires abi and bytecode`);
+      }
+
+      const existingNames = existingModule.contracts.map(c => c.contractName);
+      let finalName = contract.contractName;
+      let counter = 1;
+      while (existingNames.includes(finalName)) {
+        finalName = `${contract.contractName}_${counter}`;
+        counter++;
+      }
+      contract.contractName = finalName;
+    }
+
+    const mergedContracts = [...existingModule.contracts, ...newContracts];
+
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .update({
+        contracts: JSON.stringify(mergedContracts),
+        updated_at: new Date().toISOString()
+      })
+      .eq('module_id', moduleId)
+      .eq('enabled', true)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[ModuleRegistryService] Error adding contracts to module:', error);
+      throw new Error(`Failed to add contracts to module: ${error.message}`);
+    }
+
+    return this.formatModuleResponse(data);
+  }
+
+  /**
    * Auto-generate constructor params for standard JRC contract types
    */
   buildConstructorParams(contractType, { moduleId, contractName, walletAddress, routerAddress }) {

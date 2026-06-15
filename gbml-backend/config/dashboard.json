@@ -334,7 +334,7 @@
     {
       "moduleId": "cupidatatnonnulla",
       "contractType": "CUSTOM_CUPIDATATNONNULLA",
-      "contractAddress": "0xc9c72136601b6d92b0384Ab2a8787CBC0ad9E381",
+      "contractAddress": "0x81a77B0B050DDF129A2cbFe206b8C8A63aEFC65C",
       "enabled": true,
       "walletAddress": "0x498a5a0e31d60a156b4f43c7a594f9a75dc627a6",
       "jvdRouterAddress": "0xcebf51b243d448210d43bf7b38f67011036c29b8",
@@ -342,10 +342,10 @@
       "moduleName": "cupidatatnonnulla",
       "contracts": [
         {
-          "contractName": "cupidatatnonnulla_governance",
-          "contractType": "GOVERNANCE",
-          "contractAddress": "0xc9c72136601b6d92b0384Ab2a8787CBC0ad9E381",
-          "txHash": "0xc57fb3bac853f1fc3a1da04a5b5c98f2d6647bf55b2b64ee3b9000b2bc060a72"
+          "contractName": "cupidatatnonnulla_token",
+          "contractType": "TOKEN",
+          "contractAddress": "0x81a77B0B050DDF129A2cbFe206b8C8A63aEFC65C",
+          "txHash": "0x1660e05fe06d51c46e9e335af3649c27cf23f840d5d0ee4338dbb64b5cd0e025"
         }
       ],
       "services": {
@@ -353,50 +353,56 @@
         "settlement": true,
         "conversion": false
       },
-      "compliance": {
-        "kycRequired": true,
-        "amlRequired": true
-      },
+      "compliance": {},
       "switchable": {
         "enabled": true,
         "analytics": true,
         "transactions": true,
         "compliance": true,
-        "governance": true
+        "governance": false
       },
       "capabilities": {
-        "hasToken": false,
+        "hasToken": true,
         "hasNFT": false,
-        "hasGovernance": true,
+        "hasGovernance": false,
         "hasAnalytics": true,
-        "hasCompliance": true,
+        "hasCompliance": false,
         "hasTreasury": false,
         "hasRouter": false
       },
       "endpoints": [
         {
-          "path": "/gbml/blockchain-modules/cupidatatnonnulla/governance",
-          "method": "GET",
-          "contractRef": "cupidatatnonnulla_governance",
-          "contractAddress": "0xc9c72136601b6d92b0384Ab2a8787CBC0ad9E381",
-          "contractType": "GOVERNANCE",
-          "feature": "governance",
+          "path": "/gbml/payments/send",
+          "method": "POST",
+          "contractRef": "cupidatatnonnulla_token",
+          "contractAddress": "0x81a77B0B050DDF129A2cbFe206b8C8A63aEFC65C",
+          "contractType": "TOKEN",
+          "feature": "transactions",
           "enabled": true
         },
         {
-          "path": "/gbml/blockchain-modules/cupidatatnonnulla/governance/proposals",
+          "path": "/gbml/wallets/cupidatatnonnulla/transfer",
           "method": "POST",
-          "contractRef": "cupidatatnonnulla_governance",
-          "contractAddress": "0xc9c72136601b6d92b0384Ab2a8787CBC0ad9E381",
-          "contractType": "GOVERNANCE",
-          "feature": "governance",
+          "contractRef": "cupidatatnonnulla_token",
+          "contractAddress": "0x81a77B0B050DDF129A2cbFe206b8C8A63aEFC65C",
+          "contractType": "TOKEN",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/settlements",
+          "method": "POST",
+          "contractRef": "cupidatatnonnulla_token",
+          "contractAddress": "0x81a77B0B050DDF129A2cbFe206b8C8A63aEFC65C",
+          "contractType": "TOKEN",
+          "feature": "transactions",
           "enabled": true
         }
       ],
       "platformIntegrations": [],
       "uiProperties": {},
-      "boundAt": "2026-06-14T10:41:04.143Z",
-      "updatedAt": "2026-06-14T10:41:04.149Z"
+      "boundAt": "2026-06-15T20:52:35.099Z",
+      "updatedAt": "2026-06-15T20:52:35.259Z"
     },
     {
       "moduleId": "credit",

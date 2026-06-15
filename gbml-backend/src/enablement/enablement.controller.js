@@ -125,6 +125,33 @@ export async function disableBlockchain(req, res) {
 }
 
 /**
+ * Deploy additional contracts to an already-enabled module
+ * POST /blockchain-modules/:moduleId/contracts
+ */
+export async function deployAdditionalContracts(req, res) {
+  try {
+    const { moduleId } = req.params;
+    const { contractDefinitions } = req.body;
+
+    if (!contractDefinitions || !Array.isArray(contractDefinitions) || contractDefinitions.length === 0) {
+      return res.status(400).json({
+        error: 'contractDefinitions array is required with at least one contract'
+      });
+    }
+
+    const result = await enablementService.deployAdditionalContracts(moduleId, contractDefinitions);
+
+    return res.json(result);
+  } catch (err) {
+    console.error('Error deploying additional contracts:', err);
+    return res.status(500).json({
+      error: 'Failed to deploy additional contracts',
+      message: err.message
+    });
+  }
+}
+
+/**
  * Update module services
  * PATCH /blockchain-modules/:moduleId/services
  */

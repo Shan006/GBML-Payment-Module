@@ -1,4 +1,4 @@
-import { registerCustomModule, getCustomModule, listCustomModules, updateCustomModule, disableCustomModule } from './module-registry.controller.js';
+import { registerCustomModule, getCustomModule, listCustomModules, updateCustomModule, disableCustomModule, addContractsToCustomModule } from './module-registry.controller.js';
 
 export function setupCustomModuleRoutes(app, writeLimiter) {
   app.post('/custom-modules', writeLimiter, registerCustomModule);
@@ -15,4 +15,7 @@ export function setupCustomModuleRoutes(app, writeLimiter) {
 
   app.delete('/custom-modules/:moduleId', disableCustomModule);
   app.delete('/gbml/custom-modules/:moduleId', disableCustomModule);
+
+  app.post('/custom-modules/:moduleId/contracts', writeLimiter, addContractsToCustomModule);
+  app.post('/gbml/custom-modules/:moduleId/contracts', writeLimiter, addContractsToCustomModule);
 }

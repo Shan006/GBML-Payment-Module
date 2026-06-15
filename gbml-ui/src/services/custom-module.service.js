@@ -55,6 +55,28 @@ export const updateCustomModule = async (moduleId, updates) => {
 };
 
 /**
+ * Add contracts to an existing custom module
+ * @param {string} moduleId - Module ID
+ * @param {Array} contracts - Array of contract definitions to add
+ * @returns {Promise<Object>} Updated module
+ */
+export const addContractsToCustomModule = async (moduleId, contracts) => {
+  const response = await axios.post(`${CUSTOM_MODULES_BASE}/${moduleId}/contracts`, { contracts });
+  return response.data;
+};
+
+/**
+ * Deploy additional contracts to an already-enabled module
+ * @param {string} moduleId - Module ID
+ * @param {Array} contractDefinitions - Array of contract definitions to deploy
+ * @returns {Promise<Object>} Deployment result
+ */
+export const deployAdditionalContracts = async (moduleId, contractDefinitions) => {
+  const response = await axios.post(`${API_BASE_URL}/blockchain-modules/${moduleId}/contracts`, { contractDefinitions });
+  return response.data;
+};
+
+/**
  * Disable a custom module
  * @param {string} moduleId - Module ID
  * @returns {Promise<Object>} Result

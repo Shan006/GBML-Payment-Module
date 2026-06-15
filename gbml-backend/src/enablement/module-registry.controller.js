@@ -114,6 +114,39 @@ export async function updateCustomModule(req, res) {
 }
 
 /**
+ * Add contracts to an existing custom module
+ * POST /custom-modules/:moduleId/contracts
+ */
+export async function addContractsToCustomModule(req, res) {
+  try {
+    const { moduleId } = req.params;
+    const { contracts } = req.body;
+
+    if (!contracts || !Array.isArray(contracts) || contracts.length === 0) {
+      return res.status(400).json({
+        error: 'Contracts array is required and must contain at least one contract'
+      });
+    }
+
+    const result = await moduleRegistryService.addContractsToModule(moduleId, contracts);
+
+    return res.json({
+      success: true,
+      module: result
+    });
+  } catch (err) {
+    console.error('Error adding contracts to custom module:', err);
+    const status = err.message.includes('not found') ? 404
+      : err.message.includes('already exists') ? 409
+      : 500;
+    return res.status(status).json({
+      error: 'Failed to add contracts to custom module',
+      message: err.message
+    });
+  }
+}
+
+/**
  * Disable a custom module
  * DELETE /custom-modules/:moduleId
  */

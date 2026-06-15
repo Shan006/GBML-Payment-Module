@@ -81,6 +81,19 @@ export class EnablementService {
     return await this.orchestrator.getStats();
   }
 
+  async deployAdditionalContracts(moduleId, contractDefinitions) {
+    if (!moduleId || !contractDefinitions?.length) {
+      throw new Error('moduleId and contractDefinitions are required');
+    }
+
+    console.log(`[EnablementService] Deploying additional contracts for module: ${moduleId}`);
+
+    return await this.orchestrator.deployAdditionalContracts({
+      moduleId,
+      contractDefinitions
+    });
+  }
+
   async disableBlockchain(moduleId, identity = {}) {
     const result = await this.orchestrator.disableBlockchain(moduleId);
     return result;

@@ -5,7 +5,8 @@ import {
   listModules, 
   getStats,
   disableBlockchain,
-  updateServices
+  updateServices,
+  deployAdditionalContracts
 } from './enablement.controller.js';
 import {
   getModuleBindings,
@@ -42,5 +43,8 @@ router.post('/:moduleId/disable', authenticate, authorize(['admin']), disableBlo
 
 // Update module services (admin only)
 router.patch('/:moduleId/services', authenticate, authorize(['admin']), updateServices);
+
+// Deploy additional contracts to an already-enabled module (admin only)
+router.post('/:moduleId/contracts', authenticate, authorize(['admin']), deployAdditionalContracts);
 
 export default router;
