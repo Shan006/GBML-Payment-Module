@@ -397,6 +397,154 @@
       "uiProperties": {},
       "boundAt": "2026-06-14T10:41:04.143Z",
       "updatedAt": "2026-06-14T10:41:04.149Z"
+    },
+    {
+      "moduleId": "credit",
+      "contractType": "CUSTOM_CREDIT",
+      "contractAddress": "0x152860416968eeD023A4Ff6A076F2F8958a677EE",
+      "enabled": true,
+      "walletAddress": "0x757fd456c108a785880004bb5faeec733070eced",
+      "jvdRouterAddress": "0xcebf51b243d448210d43bf7b38f67011036c29b8",
+      "isCustom": true,
+      "moduleName": "credit",
+      "contracts": [
+        {
+          "contractName": "credit_token",
+          "contractType": "TOKEN",
+          "contractAddress": "0x152860416968eeD023A4Ff6A076F2F8958a677EE",
+          "txHash": "0x242a971d12247df52c0b479b732b5421e9dadea3a0397f5c0891e29f1f38e7a8"
+        },
+        {
+          "contractName": "credit_nft",
+          "contractType": "NFT",
+          "contractAddress": "0x21150ad656CEd7605755530727FA3Dc51e85B3EB",
+          "txHash": "0x1af625b942056ddc79b7932bef9067c0576ff5099c83b972633bc25e7b0119fa"
+        },
+        {
+          "contractName": "credit_bundle",
+          "contractType": "BUNDLE",
+          "contractAddress": "0xdB991D85C62140A125aEaC337B44f5647cA18868",
+          "txHash": "0xa7612a1ddb98d4aadfdfc957acbc0c37901b3eceddcd9d73861cdb17af27a731"
+        },
+        {
+          "contractName": "credit_governance",
+          "contractType": "GOVERNANCE",
+          "contractAddress": "0x5048312C3bB3FF160bf0464b7a30569792aaC7FC",
+          "txHash": "0x642b980efb1ed623b023189657637e209c7f581d5d4ddcc41198cd17ff8fd9b4"
+        }
+      ],
+      "services": {
+        "wallet": true,
+        "settlement": true,
+        "conversion": false
+      },
+      "compliance": {
+        "kycRequired": true,
+        "amlRequired": true
+      },
+      "switchable": {
+        "enabled": true,
+        "analytics": true,
+        "transactions": true,
+        "compliance": true,
+        "governance": true
+      },
+      "capabilities": {
+        "hasToken": true,
+        "hasNFT": true,
+        "hasGovernance": true,
+        "hasAnalytics": true,
+        "hasCompliance": true,
+        "hasTreasury": false,
+        "hasRouter": false
+      },
+      "endpoints": [
+        {
+          "path": "/gbml/payments/send",
+          "method": "POST",
+          "contractRef": "credit_token",
+          "contractAddress": "0x152860416968eeD023A4Ff6A076F2F8958a677EE",
+          "contractType": "TOKEN",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/wallets/credit/transfer",
+          "method": "POST",
+          "contractRef": "credit_token",
+          "contractAddress": "0x152860416968eeD023A4Ff6A076F2F8958a677EE",
+          "contractType": "TOKEN",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/settlements",
+          "method": "POST",
+          "contractRef": "credit_token",
+          "contractAddress": "0x152860416968eeD023A4Ff6A076F2F8958a677EE",
+          "contractType": "TOKEN",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/payments/send",
+          "method": "POST",
+          "contractRef": "credit_nft",
+          "contractAddress": "0x21150ad656CEd7605755530727FA3Dc51e85B3EB",
+          "contractType": "NFT",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/wallets/credit/transfer",
+          "method": "POST",
+          "contractRef": "credit_nft",
+          "contractAddress": "0x21150ad656CEd7605755530727FA3Dc51e85B3EB",
+          "contractType": "NFT",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/payments/send",
+          "method": "POST",
+          "contractRef": "credit_bundle",
+          "contractAddress": "0xdB991D85C62140A125aEaC337B44f5647cA18868",
+          "contractType": "BUNDLE",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/settlements",
+          "method": "POST",
+          "contractRef": "credit_bundle",
+          "contractAddress": "0xdB991D85C62140A125aEaC337B44f5647cA18868",
+          "contractType": "BUNDLE",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/blockchain-modules/credit/governance",
+          "method": "GET",
+          "contractRef": "credit_governance",
+          "contractAddress": "0x5048312C3bB3FF160bf0464b7a30569792aaC7FC",
+          "contractType": "GOVERNANCE",
+          "feature": "governance",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/blockchain-modules/credit/governance/proposals",
+          "method": "POST",
+          "contractRef": "credit_governance",
+          "contractAddress": "0x5048312C3bB3FF160bf0464b7a30569792aaC7FC",
+          "contractType": "GOVERNANCE",
+          "feature": "governance",
+          "enabled": true
+        }
+      ],
+      "platformIntegrations": [],
+      "uiProperties": {},
+      "boundAt": "2026-06-15T20:24:46.666Z",
+      "updatedAt": "2026-06-15T20:24:46.676Z"
     }
   ]
 }
