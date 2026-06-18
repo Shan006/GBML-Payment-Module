@@ -193,8 +193,12 @@ export const useModuleFeatureFlags = () => {
   }, []);
 
   // Check if a feature flag is enabled for a module
+  // All features are enabled by default unless explicitly disabled
   const isFeatureEnabled = useCallback((moduleId, flagName) => {
-    return featureFlags[moduleId]?.[flagName] || false;
+    const moduleFlags = featureFlags[moduleId];
+    if (!moduleFlags) return true; // No saved flags = all enabled by default
+    if (moduleFlags[flagName] === false) return false; // Explicitly disabled
+    return moduleFlags[flagName] !== false; // Enabled by default
   }, [featureFlags]);
 
   // Enable all features for a module

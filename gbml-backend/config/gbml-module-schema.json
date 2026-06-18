@@ -11,8 +11,8 @@
         "contractName": { "type": "string", "description": "Human-readable contract identifier within the module" },
         "contractType": {
           "type": "string",
-          "enum": ["TOKEN", "NFT", "BUNDLE", "TREASURY", "ROUTER", "GOVERNANCE", "CUSTOM"],
-          "description": "JRC standard or custom contract type"
+          "enum": ["TOKEN", "NFT", "BUNDLE", "TREASURY", "ROUTER", "GOVERNANCE", "CUSTOM", "JOB_ESCROW", "REPUTATION"],
+          "description": "JRC standard, custom, or job board contract type"
         },
         "jrcStandard": {
           "type": "string",
@@ -102,7 +102,7 @@
       },
       "platformIntegrations": {
         "type": "array",
-        "items": { "type": "string", "enum": ["GRANTS", "PAYMENTS", "SAAS", "CREDIT", "MARKETPLACE"] },
+        "items": { "type": "string", "enum": ["GRANTS", "PAYMENTS", "SAAS", "CREDIT", "MARKETPLACE", "JOB_BOARD"] },
         "description": "Cross-platform ecosystems this module integrates with"
       }
     }
@@ -114,7 +114,9 @@
     "COMPOSABLE": { "template": "JRC998WithJvdRouter", "jrcStandard": "JRC-998", "routeThroughJvdEgcr": true },
     "TREASURY": { "template": "Treasury", "jrcStandard": null, "routeThroughJvdEgcr": false },
     "ROUTER": { "template": "Router", "jrcStandard": null, "routeThroughJvdEgcr": false },
-    "GOVERNANCE": { "template": null, "jrcStandard": "JRC-CUSTOM", "routeThroughJvdEgcr": false, "note": "Requires custom ABI/bytecode or external DAO contract" }
+    "GOVERNANCE": { "template": null, "jrcStandard": "JRC-CUSTOM", "routeThroughJvdEgcr": false, "note": "Requires custom ABI/bytecode or external DAO contract" },
+    "JOB_ESCROW": { "template": "JobBoardEscrow", "jrcStandard": "JRC-CUSTOM", "routeThroughJvdEgcr": false, "note": "Escrow-based job payment management" },
+    "REPUTATION": { "template": "ReputationLedger", "jrcStandard": "JRC-CUSTOM", "routeThroughJvdEgcr": false, "note": "On-chain reputation and ratings ledger" }
   },
   "defaultEndpointBindings": {
     "TOKEN": [
@@ -141,6 +143,23 @@
     ],
     "TREASURY": [
       { "path": "/gbml/disbursements", "method": "POST", "feature": "transactions" }
+    ],
+    "JOB_ESCROW": [
+      { "path": "/gbml/jobs/:moduleId/create", "method": "POST", "feature": "transactions" },
+      { "path": "/gbml/jobs/:moduleId/:jobId/assign", "method": "POST", "feature": "transactions" },
+      { "path": "/gbml/jobs/:moduleId/:jobId/complete", "method": "POST", "feature": "transactions" },
+      { "path": "/gbml/jobs/:moduleId/:jobId/cancel", "method": "POST", "feature": "transactions" },
+      { "path": "/gbml/jobs/:moduleId/:jobId/dispute", "method": "POST", "feature": "governance" },
+      { "path": "/gbml/jobs/:moduleId/:jobId/resolve", "method": "POST", "feature": "governance" },
+      { "path": "/gbml/jobs/:moduleId/:jobId", "method": "GET", "feature": "transactions" },
+      { "path": "/gbml/jobs/:moduleId/stats", "method": "GET", "feature": "analytics" },
+      { "path": "/gbml/jobs/:moduleId/escrow-balance", "method": "GET", "feature": "analytics" }
+    ],
+    "REPUTATION": [
+      { "path": "/gbml/reputation/:moduleId/rate", "method": "POST", "feature": "transactions" },
+      { "path": "/gbml/reputation/:moduleId/batch-rate", "method": "POST", "feature": "transactions" },
+      { "path": "/gbml/reputation/:moduleId/:address", "method": "GET", "feature": "analytics" },
+      { "path": "/gbml/reputation/:moduleId/:address/ratings", "method": "GET", "feature": "analytics" }
     ]
   },
   "predefinedModuleTypes": ["FUND", "TREASURY", "GRANT", "REGISTRY", "PAYMENT", "TOKEN", "NFT", "ROUTER"]

@@ -12,7 +12,9 @@ const CONTRACTS = {
   TREASURY: 'Treasury',
   ROUTER: 'Router',
   GOVERNANCE: 'Governance',
-  JVD_ROUTER: 'JvdEgcrRouter'
+  JVD_ROUTER: 'JvdEgcrRouter',
+  JOB_ESCROW: 'JobBoardEscrow',
+  REPUTATION: 'ReputationLedger'
 };
 
 
@@ -133,7 +135,7 @@ export class ContractFactoryService {
         
         // Determine if this is a standard contract type or custom
         const type = contractDef.contractType?.toUpperCase();
-        const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'COMPOSABLE', 'TREASURY', 'ROUTER', 'GOVERNANCE', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT'];
+        const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'COMPOSABLE', 'TREASURY', 'ROUTER', 'GOVERNANCE', 'FUND', 'GRANT', 'REGISTRY', 'PAYMENT', 'JOB_ESCROW', 'REPUTATION'];
         const isStandardType = artifactBackedTypes.includes(type);
         
         let artifact;

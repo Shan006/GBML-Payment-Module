@@ -174,6 +174,8 @@ export const AVAILABLE_CONTRACT_TYPES = [
   { value: 'NFT', label: 'NFT (JRC-721)', icon: '🖼️', description: 'Non-fungible token standard' },
   { value: 'BUNDLE', label: 'Bundle NFT (JRC-998)', icon: '📦', description: 'Composable NFT standard' },
   { value: 'GOVERNANCE', label: 'Governance/DAO', icon: '🗳️', description: 'DAO governance contract' },
+  { value: 'JOB_ESCROW', label: 'Job Escrow', icon: '💰', description: 'Escrow-based job payment and dispute management' },
+  { value: 'REPUTATION', label: 'Reputation Ledger', icon: '⭐', description: 'On-chain reputation and ratings tracking' },
   { value: 'CUSTOM', label: 'Custom Contract', icon: '⚙️', description: 'Custom smart contract' }
 ];
 

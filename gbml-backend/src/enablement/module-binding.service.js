@@ -12,7 +12,9 @@ const CAPABILITY_MAP = {
   COMPOSABLE: 'hasNFT',
   GOVERNANCE: 'hasGovernance',
   TREASURY: 'hasTreasury',
-  ROUTER: 'hasRouter'
+  ROUTER: 'hasRouter',
+  JOB_ESCROW: 'hasJobEscrow',
+  REPUTATION: 'hasReputation'
 };
 
 /**
@@ -50,7 +52,9 @@ export class ModuleBindingService {
       hasAnalytics: true,
       hasCompliance: false,
       hasTreasury: false,
-      hasRouter: false
+      hasRouter: false,
+      hasJobEscrow: false,
+      hasReputation: false
     };
 
     for (const deployment of deployments) {

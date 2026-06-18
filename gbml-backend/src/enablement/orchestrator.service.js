@@ -37,7 +37,9 @@ export class OrchestratorService {
     TOKEN: 'TOKEN',
     NFT: 'NFT',
     COMPOSABLE: 'NFT',
-    ROUTER: 'ROUTER'
+    ROUTER: 'ROUTER',
+    JOB_ESCROW: 'JOB_ESCROW',
+    REPUTATION: 'REPUTATION'
   };
 
   /**
@@ -340,6 +342,14 @@ export class OrchestratorService {
           constructorParams: [walletAddress]
         };
       case 'GOVERNANCE':
+        return {
+          constructorParams: [walletAddress]
+        };
+      case 'JOB_ESCROW':
+        return {
+          constructorParams: [jvdRouterAddress, walletAddress]
+        };
+      case 'REPUTATION':
         return {
           constructorParams: [walletAddress]
         };

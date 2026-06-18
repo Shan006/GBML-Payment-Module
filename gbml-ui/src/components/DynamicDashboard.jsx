@@ -9,6 +9,7 @@ import { useModule } from '../hooks/useDynamicModules';
 import { useModuleFeatureFlags } from '../hooks/useDynamicModules';
 import TokenBalances from './TokenBalances';
 import TransactionHistory from './TransactionHistory';
+import JobBoardDashboard from './JobBoardDashboard';
 
 function DynamicDashboard({ moduleId, role }) {
   const { module, loading, error } = useModule(moduleId);
@@ -225,6 +226,11 @@ function DynamicDashboard({ moduleId, role }) {
               <p>DAO governance interface coming soon...</p>
             </div>
           </WidgetContainer>
+        )}
+
+        {/* Job Board Widget */}
+        {capabilities.hasJobEscrow && isFeatureEnabled(moduleId, 'transactions') && (
+          <JobBoardDashboard moduleId={moduleId} />
         )}
 
         {/* Compliance Widget */}

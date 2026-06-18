@@ -6,6 +6,7 @@ import fiatRoutes from "./routes/fiat.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import disbursementRoutes from "./routes/disbursement.routes.js";
 import apiKeyRoutes from "./routes/api-key.routes.js";
+import jobsRoutes from "./routes/jobs.routes.js";
 import contractsRoutes from "./contracts/contracts.routes.js";
 import deploymentRoutes from "./deployment/deployment.routes.js";
 import enablementRoutes from "./enablement/enablement.routes.js";
@@ -71,6 +72,9 @@ app.use("/gbml/wallets", walletsRoutes);
 
 // Custom Module Registry routes
 setupCustomModuleRoutes(app, deployLimiter);
+
+// Job Board routes
+app.use("/gbml", jobsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

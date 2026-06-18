@@ -10,7 +10,9 @@ const CONTRACTS = {
   TREASURY: 'Treasury',
   ROUTER: 'Router',
   GOVERNANCE: 'Governance',
-  JVD_ROUTER: 'JvdEgcrRouter'
+  JVD_ROUTER: 'JvdEgcrRouter',
+  JOB_ESCROW: 'JobBoardEscrow',
+  REPUTATION: 'ReputationLedger'
 };
 
 

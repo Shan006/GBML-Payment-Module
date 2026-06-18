@@ -782,6 +782,79 @@
       "artifacts": [
         "Governance"
       ]
+    },
+    "D:\\Shayan\\Projects\\FREELANCE\\Juvidoe Projects\\Payment GB\\gbml-backend\\contracts\\JobBoardEscrow.sol": {
+      "lastModificationDate": 1781557361365,
+      "contentHash": "30def13b7e42b47803a2f53d69f681e1",
+      "sourceName": "contracts/JobBoardEscrow.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC20",
+        "JobBoardEscrow"
+      ]
+    },
+    "D:\\Shayan\\Projects\\FREELANCE\\Juvidoe Projects\\Payment GB\\gbml-backend\\contracts\\ReputationLedger.sol": {
+      "lastModificationDate": 1781557394298,
+      "contentHash": "1c9472bdf37f09f39e3275fb857cb0d7",
+      "sourceName": "contracts/ReputationLedger.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ReputationLedger"
+      ]
     }
   }
 }

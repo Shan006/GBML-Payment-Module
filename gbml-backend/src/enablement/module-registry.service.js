@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 import { ethers } from 'ethers';
 import { supabase } from '../config/supabase.js';
 
-const STANDARD_CONTRACT_TYPES = ['TOKEN', 'NFT', 'BUNDLE', 'COMPOSABLE', 'TREASURY', 'ROUTER', 'GOVERNANCE'];
+const STANDARD_CONTRACT_TYPES = ['TOKEN', 'NFT', 'BUNDLE', 'COMPOSABLE', 'TREASURY', 'ROUTER', 'GOVERNANCE', 'JOB_ESCROW', 'REPUTATION'];
 
 /**
  * Module Registry Service
@@ -39,7 +39,7 @@ export class ModuleRegistryService {
       throw new Error('At least one contract must be defined for a custom module');
     }
 
-    const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER', 'GOVERNANCE'];
+    const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER', 'GOVERNANCE', 'JOB_ESCROW', 'REPUTATION'];
 
     for (const contract of contracts) {
       if (!contract.contractName || !contract.contractType) {
@@ -231,7 +231,7 @@ export class ModuleRegistryService {
       throw new Error(`Custom module not found: ${moduleId}`);
     }
 
-    const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER', 'GOVERNANCE'];
+    const artifactBackedTypes = ['TOKEN', 'NFT', 'BUNDLE', 'TREASURY', 'ROUTER', 'GOVERNANCE', 'JOB_ESCROW', 'REPUTATION'];
 
     for (const contract of newContracts) {
       if (!contract.contractName || !contract.contractType) {
@@ -301,6 +301,10 @@ export class ModuleRegistryService {
       case 'ROUTER':
         return [walletAddress];
       case 'GOVERNANCE':
+        return [walletAddress];
+      case 'JOB_ESCROW':
+        return [routerAddress, walletAddress];
+      case 'REPUTATION':
         return [walletAddress];
       default:
         return [];

@@ -1,0 +1,54 @@
+{
+  "moduleId": "freelance-job-board",
+  "moduleName": "Freelance Job Board",
+  "moduleType": "CUSTOM_JOB_BOARD",
+  "description": "Blockchain-powered freelance job board with tokenized escrow payments, dispute resolution, and on-chain reputation tracking. Integrates with existing web2 job boards via REST API.",
+  "contracts": [
+    {
+      "contractName": "PlatformToken",
+      "contractType": "TOKEN",
+      "jrcStandard": "JRC-20",
+      "routeThroughJvdEgcr": true,
+      "constructorParams": [
+        "Freelance Platform Token",
+        "FPT",
+        18,
+        "100000000000000000000000000",
+        "{{walletAddress}}",
+        "{{routerAddress}}"
+      ]
+    },
+    {
+      "contractName": "JobEscrow",
+      "contractType": "JOB_ESCROW",
+      "constructorParams": ["{{routerAddress}}", "{{walletAddress}}"]
+    },
+    {
+      "contractName": "ReputationLedger",
+      "contractType": "REPUTATION",
+      "constructorParams": ["{{walletAddress}}"]
+    }
+  ],
+  "services": {
+    "wallet": true,
+    "settlement": true,
+    "conversion": false
+  },
+  "compliance": {
+    "kycRequired": true,
+    "amlRequired": true
+  },
+  "switchable": {
+    "enabled": true,
+    "analytics": true,
+    "transactions": true,
+    "compliance": true,
+    "governance": true
+  },
+  "uiProperties": {
+    "icon": "💼",
+    "primaryColor": "#4a90d9",
+    "displayName": "Freelance Job Board"
+  },
+  "platformIntegrations": ["PAYMENTS", "JOB_BOARD", "CREDIT"]
+}
