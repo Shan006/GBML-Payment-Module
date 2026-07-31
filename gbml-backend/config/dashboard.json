@@ -551,6 +551,84 @@
       "uiProperties": {},
       "boundAt": "2026-06-15T20:24:46.666Z",
       "updatedAt": "2026-06-15T20:24:46.676Z"
+    },
+    {
+      "moduleId": "ttt-001",
+      "contractType": "TOKEN",
+      "contractAddress": "0x46513BCb67c1d1ba66Bfdcf9F0536D24f8617D26",
+      "enabled": true,
+      "walletAddress": "0x43d181bfab410526ec7809d31556bfc25eedb335",
+      "jvdRouterAddress": "0xcebf51b243d448210d43bf7b38f67011036c29b8",
+      "isCustom": false,
+      "moduleName": "ttt-001",
+      "contracts": [
+        {
+          "contractName": "TOKEN_ttt-001",
+          "contractType": "TOKEN",
+          "contractAddress": "0x46513BCb67c1d1ba66Bfdcf9F0536D24f8617D26",
+          "txHash": "0x96bd2f2f550122af42cdc40849e3f2c623c33fb2ca261dbb27e2ea095d69d284"
+        }
+      ],
+      "services": {
+        "wallet": true,
+        "settlement": false,
+        "conversion": false
+      },
+      "compliance": {
+        "kycRequired": true,
+        "amlRequired": true
+      },
+      "switchable": {
+        "enabled": true,
+        "analytics": true,
+        "transactions": true,
+        "compliance": true,
+        "governance": false
+      },
+      "capabilities": {
+        "hasToken": true,
+        "hasNFT": false,
+        "hasGovernance": false,
+        "hasAnalytics": true,
+        "hasCompliance": true,
+        "hasTreasury": false,
+        "hasRouter": false,
+        "hasJobEscrow": false,
+        "hasReputation": false
+      },
+      "endpoints": [
+        {
+          "path": "/gbml/payments/send",
+          "method": "POST",
+          "contractRef": "TOKEN_ttt-001",
+          "contractAddress": "0x46513BCb67c1d1ba66Bfdcf9F0536D24f8617D26",
+          "contractType": "TOKEN",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/wallets/ttt-001/transfer",
+          "method": "POST",
+          "contractRef": "TOKEN_ttt-001",
+          "contractAddress": "0x46513BCb67c1d1ba66Bfdcf9F0536D24f8617D26",
+          "contractType": "TOKEN",
+          "feature": "transactions",
+          "enabled": true
+        },
+        {
+          "path": "/gbml/settlements",
+          "method": "POST",
+          "contractRef": "TOKEN_ttt-001",
+          "contractAddress": "0x46513BCb67c1d1ba66Bfdcf9F0536D24f8617D26",
+          "contractType": "TOKEN",
+          "feature": "transactions",
+          "enabled": true
+        }
+      ],
+      "platformIntegrations": [],
+      "uiProperties": {},
+      "boundAt": "2026-07-30T22:14:08.313Z",
+      "updatedAt": "2026-07-30T22:14:08.316Z"
     }
   ]
 }

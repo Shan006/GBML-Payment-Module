@@ -40,6 +40,7 @@ export class RouterService {
       return result.address;
     } catch (err) {
       console.error('[RouterService] Error checking/deploying JVD Router on startup:', err.message);
+      throw new Error(`Failed to check or deploy JVD Router: ${err.message}`);
     }
   }
 

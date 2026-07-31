@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build outputs
+artifacts
+cache
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test files
+test-*.js
+debug-*.js
+verify-*.js
+
+# Documentation
+*.md
+!README.md
+
+# Database migrations (don't need these in deployment)
+migration_*.sql
+supabase_schema.sql
+update_*.sql
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+
+# Other
+.DS_Store

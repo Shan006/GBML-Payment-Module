@@ -1,5 +1,7 @@
 import rateLimit from 'express-rate-limit';
 
+// Use memory store for rate limiting (works in serverless for simple rate limiting)
+// For production, consider using Redis or Vercel KV for distributed rate limiting
 const walletRequests = new Map();
 
 export const globalLimiter = rateLimit({
@@ -7,7 +9,9 @@ export const globalLimiter = rateLimit({
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Too many requests. Please try again later.' }
+  message: { error: 'Too many requests. Please try again later.' },
+  // Skip rate limiting in serverless if needed, or use memory store
+  store: undefined // Use default memory store
 });
 
 export const deployLimiter = rateLimit({
@@ -15,7 +19,8 @@ export const deployLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Too many deployment requests from this IP. Try again later.' }
+  message: { error: 'Too many deployment requests from this IP. Try again later.' },
+  store: undefined // Use default memory store
 });
 
 export function walletRateLimiter(req, res, next) {
@@ -46,4 +51,7 @@ export function cleanupWalletRateLimits() {
   }
 }
 
-setInterval(cleanupWalletRateLimits, 10 * 60 * 1000);
+// Only run cleanup interval in non-serverless environments
+if (process.env.NODE_ENV !== 'production') {
+  setInterval(cleanupWalletRateLimits, 10 * 60 * 1000);
+}
