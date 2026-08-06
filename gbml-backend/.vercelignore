@@ -3,8 +3,7 @@ node_modules
 npm-debug.log
 yarn-error.log
 
-# Build outputs
-artifacts
+# Build outputs (artifacts required at runtime for contract ABIs)
 cache
 
 # Environment files

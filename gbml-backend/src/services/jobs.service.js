@@ -16,8 +16,18 @@ function loadArtifact(contractName) {
   return JSON.parse(readFileSync(artifactPath, 'utf-8'));
 }
 
-const escrowArtifact = loadArtifact('JobBoardEscrow');
-const reputationArtifact = loadArtifact('ReputationLedger');
+let escrowArtifact = null;
+let reputationArtifact = null;
+
+function getEscrowArtifact() {
+  if (!escrowArtifact) escrowArtifact = loadArtifact('JobBoardEscrow');
+  return escrowArtifact;
+}
+
+function getReputationArtifact() {
+  if (!reputationArtifact) reputationArtifact = loadArtifact('ReputationLedger');
+  return reputationArtifact;
+}
 
 export class JobsService {
   getModuleBindings(moduleId) {
@@ -41,12 +51,12 @@ export class JobsService {
 
   getEscrowContract(moduleId) {
     const contract = this.getContractByType(moduleId, 'JOB_ESCROW');
-    return new ethers.Contract(contract.contractAddress, escrowArtifact.abi, treasurySigner);
+    return new ethers.Contract(contract.contractAddress, getEscrowArtifact().abi, treasurySigner);
   }
 
   getReputationContract(moduleId) {
     const contract = this.getContractByType(moduleId, 'REPUTATION');
-    return new ethers.Contract(contract.contractAddress, reputationArtifact.abi, treasurySigner);
+    return new ethers.Contract(contract.contractAddress, getReputationArtifact().abi, treasurySigner);
   }
 
   async createJob(moduleId, { employerAddress, budget, metadataUri }) {
